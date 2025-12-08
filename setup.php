@@ -146,7 +146,7 @@ function plugin_version_procedimientos() {
                 'license'        => 'AGPL3',
                 'author'         => '<a href="http://www.carm.es">CARM</a>',
                 'homepage'       => 'http://www.carm.es',
-                'minGlpiVersion' => '9.1.3');
+                'requirements'   => ['glpi' => ['min' => '11.0', 'max' => '12.0']]);
 }
 
 // Optional : check prerequisites before install : may print errors or add to message after redirect
