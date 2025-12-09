@@ -68,40 +68,40 @@ class PluginProcedimientosProcedimiento extends CommonDBTM {
    }
    
    // Permisos
-   public static function canCreate() {
+   public static function canCreate(): bool {
 
       return (Session::haveRight(self::$rightname, CREATE));
    }
 
-   public static function canView() {
+   public static function canView(): bool {
 
       return (Session::haveRight(self::$rightname, READ));
    }
 
-   public function canViewItem() {
+   public function canViewItem(): bool {
 
       return (Session::haveRight(self::$rightname, READ));
    }
 
-   public function canCreateItem() {
+   public function canCreateItem(): bool {
      return (Session::haveRight(self::$rightname, CREATE));
    }
 
-   public function canUpdateItem() {
+   public function canUpdateItem(): bool {
 
       return (Session::haveRight(self::$rightname, UPDATE));
    }
 
-   public function canPurgeItem() {
+   public function canPurgeItem(): bool {
 
       return (Session::haveRight(self::$rightname, PURGE));
    }
 
-   public static function canUpdate() {
+   public static function canUpdate(): bool {
      return (Session::haveRight(self::$rightname, UPDATE));
    }
 
-  public static function canPurge() {
+  public static function canPurge(): bool {
       return (Session::haveRight(self::$rightname, PURGE));
    }   
 

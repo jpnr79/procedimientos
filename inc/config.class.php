@@ -35,12 +35,12 @@ class PluginProcedimientosConfig extends CommonDBTM {
       $menu['icon']   = self::getIcon();
       
        $import_image     = '<img src="' . $CFG_GLPI['root_doc'] . '/plugins/procedimientos/pics/import.png"
-                                title="' . __('Import Procedimiento', 'procedimientos') . '">';   
+                                title="Import Procedimiento">';   
        
       $menu['links'][$import_image]     = PluginProcedimientosProcedimiento_Form::getFormURL(false)."?import_form=1"; 
 
       $menu['options']['procedimiento']['page']               = "/plugins/procedimientos/front/procedimiento.php";
-      $menu['options']['procedimiento']['title']              = __('Procedimientos', 'Procedimientos');
+      $menu['options']['procedimiento']['title']              = __('Procedimientos', 'procedimientos');
       $menu['options']['procedimiento']['icon']               = PluginProcedimientosProcedimiento::getIcon();
 	  if (Session::haveRight('plugin_procedimientos', CREATE)) {
 		$menu['options']['procedimiento']['links']['add']       = '/plugins/procedimientos/front/procedimiento.form.php';
@@ -50,7 +50,7 @@ class PluginProcedimientosConfig extends CommonDBTM {
 		$menu['options']['procedimiento']['links'][$import_image]    = PluginProcedimientosProcedimiento_Form::getFormURL(false)."/plugins/procedimientos/front/procedimiento.php?import_form=1";
 	  }
 	  $menu['options']['accion']['page']               = "/plugins/procedimientos/front/accion.php";
-     $menu['options']['accion']['title']              = __('Acciones', 'Acciones');
+     $menu['options']['accion']['title']              = __('Acciones', 'procedimientos');
      $menu['options']['accion']['icon']               = PluginProcedimientosAccion::getIcon();
 	  if (Session::haveRight('plugin_procedimientos', CREATE)) {
 			$menu['options']['accion']['links']['add']       = '/plugins/procedimientos/front/accion.form.php';
@@ -58,7 +58,7 @@ class PluginProcedimientosConfig extends CommonDBTM {
       $menu['options']['accion']['links']['search']    = '/plugins/procedimientos/front/accion.php';      
 
 	  $menu['options']['link']['page']               = "/plugins/procedimientos/front/link.php";
-     $menu['options']['link']['title']              = __('Enlaces', 'Enlaces');
+     $menu['options']['link']['title']              = __('Enlaces', 'procedimientos');
      $menu['options']['link']['icon']               = PluginProcedimientosLink::getIcon();
 	  if (Session::haveRight('plugin_procedimientos', CREATE)) {
 			$menu['options']['link']['links']['add']       = '/plugins/procedimientos/front/link.form.php';

@@ -19,7 +19,7 @@ class PluginProcedimientosTipoaccion extends CommonDropdown {
 
   static $rightname = "plugin_procedimientos";
 
-  static function canCreate() {
+  static function canCreate(): bool {
 	return false;
   } 
   

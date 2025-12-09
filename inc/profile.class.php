@@ -118,7 +118,7 @@ class PluginProcedimientosProfile extends Profile {
    static function getAllRights($all = false) {
       $rights = array(
           array('itemtype'  => 'PluginProcedimientosProcedimiento',
-                'label'     => _n('Procedimientos', 'Procedimientos', 2, 'procedimientos'),
+                'label'     => _n('Procedimiento', 'Procedimientos', 2, 'procedimientos'),
                 'field'     => 'plugin_procedimientos'
           ),
       );
@@ -163,10 +163,12 @@ class PluginProcedimientosProfile extends Profile {
             ProfileRight::addProfileRights(array($data['field']));
          }
       }
-      foreach ($DB->request("SELECT *
-                           FROM `glpi_profilerights` 
-                           WHERE `profiles_id`='".$_SESSION['glpiactiveprofile']['id']."' 
-                              AND `name` LIKE '%plugin_procedimientos%'") as $prof) {
+      foreach ($DB->request('glpi_profilerights', [
+         'WHERE' => [
+            'profiles_id' => $_SESSION['glpiactiveprofile']['id'],
+            'name' => ['LIKE', '%plugin_procedimientos%']
+         ]
+      ]) as $prof) {
          $_SESSION['glpiactiveprofile'][$prof['name']] = $prof['rights']; 
       }
    }

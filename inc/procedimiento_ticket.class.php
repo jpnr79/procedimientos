@@ -28,7 +28,7 @@ class PluginProcedimientosProcedimiento_Ticket extends CommonDBRelation {
 
 
 
-   static function canView() {
+   static function canView(): bool {
       return Session::haveRight('plugin_procedimientos', READ);
    }
    
