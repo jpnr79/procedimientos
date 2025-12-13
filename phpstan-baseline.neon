@@ -1,0 +1,475 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Call to static method showFormItemtype\(\) on an unknown class PluginFieldsContainer\.$#'
+			identifier: class.notFound
+			count: 1
+			path: ajax/container_itemtypes_dropdown.php
+
+		-
+			message: '#^Call to static method showFormSubtype\(\) on an unknown class PluginFieldsContainer\.$#'
+			identifier: class.notFound
+			count: 1
+			path: ajax/container_subtype_dropdown.php
+
+		-
+			message: '#^Call to an undefined static method Session\:\:isMultiEntitiesMode\(\)\.$#'
+			identifier: staticMethod.notFound
+			count: 2
+			path: ajax/docs.php
+
+		-
+			message: '#^Call to an undefined static method Toolbox\:\:formatOutputWebLink\(\)\.$#'
+			identifier: staticMethod.notFound
+			count: 1
+			path: ajax/docs.php
+
+		-
+			message: '#^Call to static method getGroupUserHaveRights\(\) on an unknown class TicketValidation\.$#'
+			identifier: class.notFound
+			count: 1
+			path: ajax/dropdownValidator.php
+
+		-
+			message: '#^Function formatUserName not found\.$#'
+			identifier: function.notFound
+			count: 1
+			path: ajax/dropdownValidator.php
+
+		-
+			message: '#^Call to an undefined static method Html\:\:requireJs\(\)\.$#'
+			identifier: staticMethod.notFound
+			count: 1
+			path: front/accion.form.php
+
+		-
+			message: '#^Call to an undefined static method Toolbox\:\:getItemTypeSearchURL\(\)\.$#'
+			identifier: staticMethod.notFound
+			count: 2
+			path: front/accion.form.php
+
+		-
+			message: '#^Access to undefined constant Session\:\:DEBUG_MODE\.$#'
+			identifier: classConstant.notFound
+			count: 1
+			path: front/export.php
+
+		-
+			message: '#^Call to an undefined static method Toolbox\:\:getItemTypeSearchURL\(\)\.$#'
+			identifier: staticMethod.notFound
+			count: 2
+			path: front/link.form.php
+
+		-
+			message: '#^Call to an undefined static method Toolbox\:\:getItemTypeSearchURL\(\)\.$#'
+			identifier: staticMethod.notFound
+			count: 2
+			path: front/procedimiento.form.php
+
+		-
+			message: '#^Call to an undefined static method Html\:\:requireJs\(\)\.$#'
+			identifier: staticMethod.notFound
+			count: 1
+			path: front/procedimiento_form.form.php
+
+		-
+			message: '#^File begins with UTF\-8 BOM character\. This may cause problems when running the code in the web browser\.$#'
+			identifier: whitespace.bom
+			count: 1
+			path: front/profile.form.php
+
+		-
+			message: '#^Access to constant DONE on an unknown class Planning\.$#'
+			identifier: class.notFound
+			count: 4
+			path: hook.php
+
+		-
+			message: '#^Call to an undefined static method Toolbox\:\:logInFile\(\)\.$#'
+			identifier: staticMethod.notFound
+			count: 8
+			path: hook.php
+
+		-
+			message: '#^Instantiated class PluginFormcreatorForm not found\.$#'
+			identifier: class.notFound
+			count: 2
+			path: hook.php
+
+		-
+			message: '#^Instantiated class PluginFormcreatorTargetTicket not found\.$#'
+			identifier: class.notFound
+			count: 3
+			path: hook.php
+
+		-
+			message: '#^Path in include_once\(\) "\.\./\.\./\.\./plugins/procedimientos/inc/function\.procedimientos\.php" is not a file or it does not exist\.$#'
+			identifier: includeOnce.fileNotFound
+			count: 1
+			path: hook.php
+
+		-
+			message: '#^Call to an undefined static method Ajax\:\:commonDropdownUpdateItem\(\)\.$#'
+			identifier: staticMethod.notFound
+			count: 1
+			path: inc/accion.class.php
+
+		-
+			message: '#^Call to an undefined static method Html\:\:initEditorSystem\(\)\.$#'
+			identifier: staticMethod.notFound
+			count: 1
+			path: inc/accion.class.php
+
+		-
+			message: '#^Call to an undefined static method Html\:\:textarea\(\)\.$#'
+			identifier: staticMethod.notFound
+			count: 1
+			path: inc/accion.class.php
+
+		-
+			message: '#^Call to an undefined static method Toolbox\:\:cleanNewLines\(\)\.$#'
+			identifier: staticMethod.notFound
+			count: 1
+			path: inc/accion.class.php
+
+		-
+			message: '#^Call to an undefined static method Toolbox\:\:deprecated\(\)\.$#'
+			identifier: staticMethod.notFound
+			count: 1
+			path: inc/accion.class.php
+
+		-
+			message: '#^Call to an undefined static method Toolbox\:\:strlen\(\)\.$#'
+			identifier: staticMethod.notFound
+			count: 4
+			path: inc/accion.class.php
+
+		-
+			message: '#^Call to an undefined static method Toolbox\:\:substr\(\)\.$#'
+			identifier: staticMethod.notFound
+			count: 1
+			path: inc/accion.class.php
+
+		-
+			message: '#^Deprecated in PHP 8\.0\: Required parameter \$item follows optional parameter \$remove_uuid\.$#'
+			identifier: parameter.requiredAfterOptional
+			count: 1
+			path: inc/accion.class.php
+
+		-
+			message: '#^Method PluginProcedimientosAccion\:\:import\(\) should return int but return statement is missing\.$#'
+			identifier: return.missing
+			count: 2
+			path: inc/accion.class.php
+
+		-
+			message: '#^Call to an undefined static method Dropdown\:\:showTimeStamp\(\)\.$#'
+			identifier: staticMethod.notFound
+			count: 1
+			path: inc/acciondetalle.class.php
+
+		-
+			message: '#^Call to static method dropdown\(\) on an unknown class RequestType\.$#'
+			identifier: class.notFound
+			count: 2
+			path: inc/acciondetalle.class.php
+
+		-
+			message: '#^Call to static method dropdown\(\) on an unknown class TaskTemplate\.$#'
+			identifier: class.notFound
+			count: 1
+			path: inc/acciondetalle.class.php
+
+		-
+			message: '#^Call to static method dropdownState\(\) on an unknown class Planning\.$#'
+			identifier: class.notFound
+			count: 1
+			path: inc/acciondetalle.class.php
+
+		-
+			message: '#^Call to an undefined static method Toolbox\:\:logInFile\(\)\.$#'
+			identifier: staticMethod.notFound
+			count: 15
+			path: inc/function.procedimientos.php
+
+		-
+			message: '#^Function dropdownValidator\(\) should return nothing but return statement is missing\.$#'
+			identifier: return.missing
+			count: 2
+			path: inc/function.procedimientos.php
+
+		-
+			message: '#^Instantiated class Group_Ticket not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: inc/function.procedimientos.php
+
+		-
+			message: '#^Instantiated class ITILFollowup not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: inc/function.procedimientos.php
+
+		-
+			message: '#^Instantiated class ITILSolution not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: inc/function.procedimientos.php
+
+		-
+			message: '#^Instantiated class SolutionTemplate not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: inc/function.procedimientos.php
+
+		-
+			message: '#^Instantiated class Supplier_Ticket not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: inc/function.procedimientos.php
+
+		-
+			message: '#^Instantiated class TaskTemplate not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: inc/function.procedimientos.php
+
+		-
+			message: '#^Instantiated class TicketTask not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: inc/function.procedimientos.php
+
+		-
+			message: '#^Instantiated class TicketValidation not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: inc/function.procedimientos.php
+
+		-
+			message: '#^Instantiated class Ticket_User not found\.$#'
+			identifier: class.notFound
+			count: 2
+			path: inc/function.procedimientos.php
+
+		-
+			message: '#^Access to constant HISTORY_LOG_SIMPLE_MESSAGE on an unknown class Log\.$#'
+			identifier: class.notFound
+			count: 1
+			path: inc/procedimiento.class.php
+
+		-
+			message: '#^Call to an undefined static method Ajax\:\:commonDropdownUpdateItem\(\)\.$#'
+			identifier: staticMethod.notFound
+			count: 1
+			path: inc/procedimiento.class.php
+
+		-
+			message: '#^Call to an undefined static method Toolbox\:\:append_params\(\)\.$#'
+			identifier: staticMethod.notFound
+			count: 1
+			path: inc/procedimiento.class.php
+
+		-
+			message: '#^Call to an undefined static method Toolbox\:\:strlen\(\)\.$#'
+			identifier: staticMethod.notFound
+			count: 4
+			path: inc/procedimiento.class.php
+
+		-
+			message: '#^Call to an undefined static method Toolbox\:\:substr\(\)\.$#'
+			identifier: staticMethod.notFound
+			count: 1
+			path: inc/procedimiento.class.php
+
+		-
+			message: '#^Call to static method history\(\) on an unknown class Log\.$#'
+			identifier: class.notFound
+			count: 1
+			path: inc/procedimiento.class.php
+
+		-
+			message: '#^Instantiated class Log not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: inc/procedimiento.class.php
+
+		-
+			message: '#^Access to undefined constant Search\:\:HTML_OUTPUT\.$#'
+			identifier: classConstant.notFound
+			count: 7
+			path: inc/procedimiento_form.class.php
+
+		-
+			message: '#^Call to an undefined static method Html\:\:file\(\)\.$#'
+			identifier: staticMethod.notFound
+			count: 1
+			path: inc/procedimiento_form.class.php
+
+		-
+			message: '#^Call to an undefined static method Html\:\:getMassiveActionCheckBox\(\)\.$#'
+			identifier: staticMethod.notFound
+			count: 1
+			path: inc/procedimiento_form.class.php
+
+		-
+			message: '#^Call to an undefined static method Search\:\:showEndLine\(\)\.$#'
+			identifier: staticMethod.notFound
+			count: 2
+			path: inc/procedimiento_form.class.php
+
+		-
+			message: '#^Call to an undefined static method Search\:\:showHeaderItem\(\)\.$#'
+			identifier: staticMethod.notFound
+			count: 1
+			path: inc/procedimiento_form.class.php
+
+		-
+			message: '#^Call to an undefined static method Search\:\:showItem\(\)\.$#'
+			identifier: staticMethod.notFound
+			count: 4
+			path: inc/procedimiento_form.class.php
+
+		-
+			message: '#^Call to an undefined static method Search\:\:showNewLine\(\)\.$#'
+			identifier: staticMethod.notFound
+			count: 2
+			path: inc/procedimiento_form.class.php
+
+		-
+			message: '#^Call to static method dropdown\(\) on an unknown class PluginFormcreatorForm\.$#'
+			identifier: class.notFound
+			count: 1
+			path: inc/procedimiento_form.class.php
+
+		-
+			message: '#^Instantiated class PluginFormcreatorForm not found\.$#'
+			identifier: class.notFound
+			count: 3
+			path: inc/procedimiento_form.class.php
+
+		-
+			message: '#^Instantiated class PluginFormcreatorTargetTicket not found\.$#'
+			identifier: class.notFound
+			count: 4
+			path: inc/procedimiento_form.class.php
+
+		-
+			message: '#^Instantiated class TicketRecurrent not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: inc/procedimiento_form.class.php
+
+		-
+			message: '#^Unsafe usage of new static\(\)\.$#'
+			identifier: new.static
+			count: 1
+			path: inc/procedimiento_form.class.php
+
+		-
+			message: '#^Access to constant CLASS_ACTION_SEPARATOR on an unknown class MassiveAccion\.$#'
+			identifier: class.notFound
+			count: 1
+			path: inc/procedimiento_item.class.php
+
+		-
+			message: '#^Deprecated in PHP 8\.4\: Parameter \#4 \$checkitem \(CommonDBTM\) is implicitly nullable via default value null\.$#'
+			identifier: parameter.implicitlyNullable
+			count: 1
+			path: inc/procedimiento_item.class.php
+
+		-
+			message: '#^Method PluginProcedimientosProcedimiento_Item\:\:import\(\) should return int but return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: inc/procedimiento_item.class.php
+
+		-
+			message: '#^Method PluginProcedimientosProcedimiento_Item\:\:purgar_no_encontrados\(\) should return int but return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: inc/procedimiento_item.class.php
+
+		-
+			message: '#^Call to an undefined static method Session\:\:isMultiEntitiesMode\(\)\.$#'
+			identifier: staticMethod.notFound
+			count: 2
+			path: inc/procedimiento_ticket.class.php
+
+		-
+			message: '#^Call to an undefined static method Toolbox\:\:formatOutputWebLink\(\)\.$#'
+			identifier: staticMethod.notFound
+			count: 1
+			path: inc/procedimiento_ticket.class.php
+
+		-
+			message: '#^Call to static method dropdown\(\) on an unknown class TicketRecurrent\.$#'
+			identifier: class.notFound
+			count: 1
+			path: inc/procedimiento_ticketrecurrent.class.php
+
+		-
+			message: '#^Instantiated class TicketRecurrent not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: inc/procedimiento_ticketrecurrent.class.php
+
+		-
+			message: '#^Method PluginProcedimientosProfile\:\:showForm\(\) should return nothing but return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: inc/profile.class.php
+
+		-
+			message: '#^Call to static method import\(\) on an unknown class PluginFormcreatorQuestion\.$#'
+			identifier: class.notFound
+			count: 1
+			path: inc/section.class.php
+
+		-
+			message: '#^Function plugin_formcreator_encode not found\.$#'
+			identifier: function.notFound
+			count: 2
+			path: inc/section.class.php
+
+		-
+			message: '#^Function plugin_formcreator_getFromDBByField not found\.$#'
+			identifier: function.notFound
+			count: 1
+			path: inc/section.class.php
+
+		-
+			message: '#^Function plugin_formcreator_getUuid not found\.$#'
+			identifier: function.notFound
+			count: 2
+			path: inc/section.class.php
+
+		-
+			message: '#^Instantiated class PluginFormcreatorQuestion not found\.$#'
+			identifier: class.notFound
+			count: 3
+			path: inc/section.class.php
+
+		-
+			message: '#^Instantiated class PluginFormcreatorQuestion_Condition not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: inc/section.class.php
+
+		-
+			message: '#^Method PluginProcedimientosSection\:\:post_purgeItem\(\) should return nothing but return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: inc/section.class.php
+
+		-
+			message: '#^Unsafe usage of new static\(\)\.$#'
+			identifier: new.static
+			count: 3
+			path: inc/section.class.php
+
+		-
+			message: '#^Class PluginFormcreatorTargetTicket not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: setup.php
