@@ -55,7 +55,7 @@ class PluginProcedimientosAcciondetalle extends CommonDBTM {
      return (Session::haveRight(self::$rightname, UPDATE));
    }
 
-  public static function canPurge() {
+  public static function canPurge(): bool {
       return (Session::haveRight(self::$rightname, PURGE));
    }      
   
