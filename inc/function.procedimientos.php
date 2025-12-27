@@ -365,16 +365,13 @@ function instancia_procedimiento($procedimientos_id, $tickets_id){
 	} else {
 	//[INICIO] [CRI] JMZ18G SI USAMOS $procedimiento_Ticket->add($input) SE INCLUYE EN EL HISTÓRICO DEL TICKET UN EVENTO POR CADA LINEA DEL PROCEDIMIENTO
 		$message = $nombre_procedimiento."(".$procedimientos_id.")";
-		$insert_logs = "INSERT INTO glpi_logs 
-										(itemtype, itemtype_link, items_id, linked_action, user_name, date_mod, new_value) 
-										VALUES ('Ticket', 
-														'PluginProcedimientosProcedimiento', 
-														'".$tickets_id."', 
-														'15', 
-														'".getUserName($_SESSION['glpiID'])."', 
-														NOW(),
-														'".$message."')";
-		$result = $DB->query($insert_logs);	
+		Toolbox::logInFile('procedimientos', sprintf(
+			'INFO [function.procedimientos.php:instancia_procedimiento] TicketID=%s, ProcedimientoID=%s, User=%s, Message=%s',
+			$tickets_id,
+			$procedimientos_id,
+			isset($_SESSION['glpiname']) ? $_SESSION['glpiname'] : 'unknown',
+			$message
+		));
 		//[FINAL] [CRI] JMZ18G SI USAMOS $procedimiento_Ticket->add($input) SE INCLUYE EN EL HISTÓRICO DEL TICKET UN EVENTO POR CADA LINEA DEL PROCEDIMIENTO
 	
 	}
@@ -1527,10 +1524,13 @@ if (count($rel_document) != 1) {
 							$result_update = $DB->query($update);
 							//Actualizamos el hist�rico 
 							$message = "Ejecutar ".$nombre;
-							$insert_logs = "INSERT INTO glpi_logs (itemtype,itemtype_link, items_id, linked_action, user_name, date_mod, new_value) 
-								VALUES ('Ticket','PluginProcedimientosProcedimiento', '".$tickets_id."', '18', '".getUserName($_SESSION['glpiID'])."', 
-								NOW(),'".$message."')";
-							$result = $DB->query($insert_logs);		
+							Toolbox::logInFile('procedimientos', sprintf(
+								'INFO [function.procedimientos.php:some_function] TicketID=%s, ProcedimientoID=%s, User=%s, Message=%s',
+								$tickets_id,
+								$procedimientos_id,
+								isset($_SESSION['glpiname']) ? $_SESSION['glpiname'] : 'unknown',
+								$message
+							));
 							
 						} else {
 							if ($_SESSION['glpi_use_mode'] == 2) {	

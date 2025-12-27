@@ -1,4 +1,5 @@
+use GlpiPlugin\Procedimientos\FieldsContainer;
 <?php
 include ("../../../inc/includes.php");
 
-PluginFieldsContainer::showFormSubtype($_REQUEST, true);
+FieldsContainer::showFormSubtype($_REQUEST, true);
