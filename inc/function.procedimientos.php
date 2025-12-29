@@ -365,18 +365,28 @@ function instancia_procedimiento($procedimientos_id, $tickets_id){
 	} else {
 	//[INICIO] [CRI] JMZ18G SI USAMOS $procedimiento_Ticket->add($input) SE INCLUYE EN EL HISTÓRICO DEL TICKET UN EVENTO POR CADA LINEA DEL PROCEDIMIENTO
 		$message = $nombre_procedimiento."(".$procedimientos_id.")";
-		Toolbox::logInFile('procedimientos', sprintf(
+		$__msg = sprintf(
 			'INFO [function.procedimientos.php:instancia_procedimiento] TicketID=%s, ProcedimientoID=%s, User=%s, Message=%s',
 			$tickets_id,
 			$procedimientos_id,
 			isset($_SESSION['glpiname']) ? $_SESSION['glpiname'] : 'unknown',
 			$message
-		));
+		);
+		if (class_exists('Toolbox') && method_exists('Toolbox', 'logInFile')) {
+			Toolbox::logInFile('procedimientos', $__msg);
+		} else {
+			error_log('[procedimientos] ' . $__msg);
+		}
 		//[FINAL] [CRI] JMZ18G SI USAMOS $procedimiento_Ticket->add($input) SE INCLUYE EN EL HISTÓRICO DEL TICKET UN EVENTO POR CADA LINEA DEL PROCEDIMIENTO
 	
 	}
 
-	Toolbox::logInFile("procedimientos", "Procedimiento con ID ".$procedimientos_id." Instanciado para el ticket con ID ".$tickets_id. "\n");
+	$__msg = "Procedimiento con ID " . $procedimientos_id . " Instanciado para el ticket con ID " . $tickets_id . "\n";
+	if (class_exists('Toolbox') && method_exists('Toolbox', 'logInFile')) {
+		Toolbox::logInFile('procedimientos', $__msg);
+	} else {
+		error_log('[procedimientos] ' . $__msg);
+	}
 
 
 

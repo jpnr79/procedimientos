@@ -41,7 +41,12 @@ function procedimientos_notMigratedDatetime() {
 function plugin_procedimientos_install() {
    global $DB;
 
-   Toolbox::logInFile("procedimientos", "Plugin installation\n");
+   $__msg = "Plugin installation\n";
+   if (class_exists('Toolbox') && method_exists('Toolbox', 'logInFile')) {
+	   Toolbox::logInFile('procedimientos', $__msg);
+   } else {
+	   error_log('[procedimientos] ' . $__msg);
+   }
 	
     if (!$DB->TableExists("glpi_plugin_procedimientos_procedimientos")){ 
 	
@@ -509,7 +514,12 @@ function plugin_procedimientos_update_Validation($item) {
 	$id = $item->getField('id');
 	$state = $item->getField('status');
 	$tickets_id = $item->getField('tickets_id');
-	Toolbox::logInFile("procedimientos", "Validación de Ticket con ID ".$id." modifica su estado (".$state.") en el ticket con ID ".$tickets_id. "\n");
+	$__msg = "Validación de Ticket con ID " . $id . " modifica su estado (" . $state . ") en el ticket con ID " . $tickets_id . "\n";
+	if (class_exists('Toolbox') && method_exists('Toolbox', 'logInFile')) {
+		Toolbox::logInFile('procedimientos', $__msg);
+	} else {
+		error_log('[procedimientos] ' . $__msg);
+	}
 
 	if ($state > 2){ // Estado "Concedido o Rechazado"		
 		$procedimientos_id = get_procedimiento_principal($tickets_id); 
@@ -517,7 +527,12 @@ function plugin_procedimientos_update_Validation($item) {
 			$select = "SELECT id from `glpi_plugin_procedimientos_procedimientos_tickets`
 					   WHERE tickets_id=".$tickets_id." and itemtype='PluginProcedimientosAccion' and instancia_id=".$id." and state=2;";					   
 			$result_select = $DB->doQuery($select);
-            Toolbox::logInFile("procedimientos", "Select: ".$select. "\n");	
+			$__msg = "Select: " . $select . "\n";
+			if (class_exists('Toolbox') && method_exists('Toolbox', 'logInFile')) {
+				Toolbox::logInFile('procedimientos', $__msg);
+			} else {
+				error_log('[procedimientos] ' . $__msg);
+			}
 					// [INICIO] [CRI] [JMZ18G] fetch_array deprecated function	
           //$row = $DB->fetch_array($result_select);
 						$row = $DB->fetchAssoc($result_select);
