@@ -22,6 +22,15 @@ if (!function_exists('procedimientos_log')) {
 	}
 }
 
+// Provide a minimal Toolbox fallback when GLPI Toolbox is not available (prevents fatal errors during CLI ops)
+if (!class_exists('Toolbox')) {
+	class Toolbox {
+		public static function logInFile($file, $message) {
+			error_log('[' . $file . '] ' . $message);
+		}
+	}
+}
+
 // [INICIO] [CRI] JMZ18G MIGRACIÓN GLPI 9.5.7 - 1 columnas utilizan el tipo de campo de fecha y hora en desuso.
 function procedimientos_notMigratedDatetime() {
 	global $DB;

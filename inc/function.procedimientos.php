@@ -99,12 +99,12 @@ if ($elementos==$indice){
 
 	$indices .= ", '".$valor."'";
 	
-}}
+		procedimientos_log($__msg);
 	
 $indice++;
 
 }
-
+	procedimientos_log($__msg);
 return $indices;
 
 }	
@@ -372,11 +372,7 @@ function instancia_procedimiento($procedimientos_id, $tickets_id){
 			isset($_SESSION['glpiname']) ? $_SESSION['glpiname'] : 'unknown',
 			$message
 		);
-		if (class_exists('Toolbox') && method_exists('Toolbox', 'logInFile')) {
-			Toolbox::logInFile('procedimientos', $__msg);
-		} else {
-			error_log('[procedimientos] ' . $__msg);
-		}
+		procedimientos_log($__msg);
 		//[FINAL] [CRI] JMZ18G SI USAMOS $procedimiento_Ticket->add($input) SE INCLUYE EN EL HISTÓRICO DEL TICKET UN EVENTO POR CADA LINEA DEL PROCEDIMIENTO
 	
 	}
@@ -784,7 +780,7 @@ function ejecutar_Procedimiento($tickets_id) {
 						$update = "UPDATE `glpi_plugin_procedimientos_procedimientos_tickets` SET `state`=1 WHERE id=".$id_registro.";";
 						$result_update = $DB->query($update);
 						
-						Toolbox::logInFile("procedimientos", "TRATAMIENTO MARCADOR: Actualizado Marcador. Estado = 1 en el registro ".$id_registro. "\n");	
+						procedimientos_log("TRATAMIENTO MARCADOR: Actualizado Marcador. Estado = 1 en el registro ".$id_registro. "\n");
 						
 						// Si se trata de una marca de fin dentro del procedimiento principal en ejecuci�n.
 						// Debe parar el procedimiento.
@@ -877,7 +873,7 @@ function ejecutar_Procedimiento($tickets_id) {
 								$result_update = $DB->query($update);
 								//echo "<BR>Espero a que la tarea se realice<BR>";
 								$continua = false;						
-                                Toolbox::logInFile("procedimientos", "TRATAMIENTO ACCIONES: Insertada Tarea con ID ".$instancia_id.". Estado = 2 en el registro ".$id_registro. "\n");									
+								procedimientos_log("TRATAMIENTO ACCIONES: Insertada Tarea con ID ".$instancia_id.". Estado = 2 en el registro ".$id_registro. "\n");
 							
 								// INCLUIMOS EN EL TICKET LOS DOCUMENTOS ASOCIADOS A UNA TAREA
 								// ======================= 30/04/2018 JDMARINZ ================================== 
@@ -1098,7 +1094,7 @@ if (count($rel_document) != 1) {
 							
 								$update = "UPDATE `glpi_plugin_procedimientos_procedimientos_tickets` SET `state`='1' WHERE `id`='".$id_registro."';";
 								$result_update = $DB->query($update);															
-                                Toolbox::logInFile("procedimientos", "TRATAMIENTO ACCIONES: Insertado Escalado. Estado = 1 en el registro ".$id_registro. "\n");									
+								procedimientos_log("TRATAMIENTO ACCIONES: Insertado Escalado. Estado = 1 en el registro ".$id_registro. "\n");
 							}						
 							// Tipo MODIFICACI�N TICKET:
 							else if ($tipo == 3) {
@@ -1194,7 +1190,7 @@ if (count($rel_document) != 1) {
 								if ($check_solution == false) { // No existe cambio de estado a resuelto o cerrado.
 									$update = "UPDATE `glpi_plugin_procedimientos_procedimientos_tickets` SET `state`='1' WHERE `id`='".$id_registro."';";
 									$result_update = $DB->query($update);							
-									Toolbox::logInFile("procedimientos", "TRATAMIENTO ACCIONES: Actualizado ticket. Estado = 1 en el registro ".$id_registro. "\n");									
+									procedimientos_log("TRATAMIENTO ACCIONES: Actualizado ticket. Estado = 1 en el registro ".$id_registro. "\n");
 								} else { // La modificaci�n implica cambio de estado a resuelto o cerrado.
 									$state_ticket = $ticket->getField('status');
 									if ($state_ticket > 4){ // Si se ha efectuado la modificaci�n.
@@ -1263,7 +1259,7 @@ array(7) { ["tickets_id"]=> string(2) "28" ["users_id"]=> string(1) "7"
 							
 								$update = "UPDATE `glpi_plugin_procedimientos_procedimientos_tickets` SET `state`='1', `instancia_id`='".$instancia_id."' WHERE `id`='".$id_registro."';";
 								$result_update = $DB->query($update);								
-                                Toolbox::logInFile("procedimientos", "TRATAMIENTO SEGUIMIENTO: Insertado seguimiento con ID ".$instancia_id.". Estado = 1 en el registro ".$id_registro. "\n");									
+								procedimientos_log("TRATAMIENTO SEGUIMIENTO: Insertado seguimiento con ID ".$instancia_id.". Estado = 1 en el registro ".$id_registro. "\n");
 							
 							
 															// INCLUIMOS EN EL TICKET LOS DOCUMENTOS ASOCIADOS A UNA TAREA
