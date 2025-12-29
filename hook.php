@@ -406,7 +406,7 @@ function plugin_procedimientos_getAddSearchOptions($itemtype) {
 		$sopt[1120]['field']      = 'name';
         $sopt[1120]['datatype']   = 'itemlink';
 		$sopt[1120]['linkfield']   = 'items_id';
-		$sopt[1120]['forcegroupby']  = true;
+		$sopt[1120]['forcegroupby'  ] = true;
 		$sopt[1120]['massiveaction']  = false;
         $sopt[1120]['joinparams']     =  array('beforejoin' => array('table' => 'glpi_plugin_procedimientos_procedimientos_items',
 																	 'joinparams' => array('jointype' => 'child', 
@@ -548,6 +548,8 @@ function plugin_procedimientos_update_Validation($item) {
 			   } else {
 				   error_log('[procedimientos] ' . $__msg);
 			   }
+			   // Log the select query for debugging
+    Toolbox::logInFile("procedimientos", "Select: " . $select . "\n");
 			   if ($result_select && count($result_select)) {
 				   $row = $result_select[0];
 				   if (isset($row['id'])){
@@ -704,29 +706,27 @@ Función que se ejecuta cuando actualizamos una tarea en un ticket.
 **************************************************************************************************************************************/
 function plugin_procedimientos_update_TicketTask($item) {
     global $DB;
-	$id = $item->getField('id');
-	$state = $item->getField('state');
-	$tickets_id = $item->getField('tickets_id');
-	Toolbox::logInFile("procedimientos", "Tarea de Ticket con ID ".$id." modifica su estado (".$state.") en el ticket con ID ".$tickets_id. "\n"); 
-	if ($state == 2){ // Estado "Hecho"      
-		$procedimientos_id = get_procedimiento_principal($tickets_id); 
-		if (isset($procedimientos_id)){ // Si existe un procedimiento ejecutándose para ese ticket.         
-			$select = "SELECT id from `glpi_plugin_procedimientos_procedimientos_tickets`
-						  WHERE tickets_id=".$tickets_id." and itemtype='PluginProcedimientosAccion' and instancia_id=".$id." and state=2;";                     
-			$result_select = $DB->request($select);
-			Toolbox::logInFile("procedimientos", "Select: ".$select. "\n");                        
-			if ($result_select && count($result_select)) {
-				$row = $result_select[0];
-				if (isset($row['id'])){
-					$update = "UPDATE `glpi_plugin_procedimientos_procedimientos_tickets` SET `state`=1 
-							 WHERE id=".$row['id'].";";
-					$DB->request($update);
-					ejecutar_Procedimiento($tickets_id);         
-				}
-			}
-		}
-	}
-	return true;
+    $id = $item->getField('id');
+    $state = $item->getField('state');
+    $tickets_id = $item->getField('tickets_id');
+    Toolbox::logInFile("procedimientos", "Tarea de Ticket con ID $id modifica su estado ($state) en el ticket con ID $tickets_id\n");
+    if ($state == 2) { // Estado "Hecho"
+        $procedimientos_id = get_procedimiento_principal($tickets_id);
+        if (isset($procedimientos_id)) { // Si existe un procedimiento ejecutándose para ese ticket.
+            $select = "SELECT id FROM glpi_plugin_procedimientos_procedimientos_tickets WHERE tickets_id=$tickets_id AND itemtype='PluginProcedimientosAccion' AND instancia_id=$id AND state=2;";
+            $result_select = $DB->request($select);
+            Toolbox::logInFile("procedimientos", "Select: $select\n");
+            if ($result_select && count($result_select)) {
+                $row = $result_select[0];
+                if (isset($row['id'])) {
+                    $update = "UPDATE glpi_plugin_procedimientos_procedimientos_tickets SET state=1 WHERE id=" . $row['id'] . ";";
+                    $DB->request($update);
+                    ejecutar_Procedimiento($tickets_id);
+                }
+            }
+        }
+    }
+    return true;
 }
 
 /***********************************************************************************************************************************
@@ -734,11 +734,11 @@ Función que encuentra el id del procedimiento asociado en la descripción de un
 **************************************************************************************************************************************/
 
 function plugin_procedimientos_destination($description) {
-	$content = explode("[Procedimiento de trabajo asociado",$description);
-	if (count($content)>1){
-		return intval(preg_replace("/[^0-9]/", "",$content[1]));
+	$content = explode("[Procedimiento de trabajo asociado", $description);
+	if (count($content) > 1) {
+		return intval(preg_replace("/[^0-9]/", "", $content[1]));
 	} else {
-		return 0;	
+		return 0;
 	}
 }
 
@@ -1259,11 +1259,11 @@ function plugin_procedimientos_MassiveActions($type) {
 		$procedure->getFromDB($procedure_id); 
 		//Toolbox::logInFile("procedimientos", " procedure: " . print_r($procedure, TRUE) . "\r\n\r\n"); 
 		$params = [
-			"plugin_formcreator_forms_id" 						=> $target->fields['plugin_formcreator_forms_id'],
-			"plugin_formcreator_targettickets_id" 		=> $new_target,
+			"forms_id" => $form->fields['id'],
+			"formanswers_id" => $target->fields['id'],
 			"plugin_procedimientos_procedimientos_id" => $procedure_id
-			];
-	
+		];
+
 		$relation = $item->find($params);
 		//Toolbox::logInFile("procedimientos", " params: " . print_r($params, TRUE) . "\r\n\r\n"); 
 
@@ -1328,9 +1328,10 @@ function plugin_procedimientos_MassiveActions($type) {
 		$params = [
 			"header" 	=> sprintf(__("<H3>Detalles de la relación eliminada:</H3>","procedimiento")),
 			"message" => sprintf(__("<strong>Pedido de catálogo:</strong> <br><br><font color = '#7c0068'><a target='_blank' href='".$_SESSION["glpiroot"]."/plugins/formcreator/front/form.form.php?id=".$item->fields['plugin_formcreator_forms_id']."'> %s </a></font><br><br><strong>Destino:</strong> <br><br><font color = '#7c0068'><a target='_blank' href='".$_SESSION["glpiroot"]."/plugins/formcreator/front/targetticket.form.php?id=".$item->fields['plugin_formcreator_targettickets_id']."'> %s </a></font><br>","procedimiento"),$form->fields['name'] ,$target->fields['name']),
-			"footer" 	=> sprintf(__("","procedimiento"),$target->fields['name'])
+			"footer" 	=> sprintf(__("","procedimiento"),$target->fields['name)
 			];	
 	 
+	
 		Session::addMessageAfterRedirect(PluginProcedimientosProcedimiento_Form::plugin_procedimientos_get_message($params, "d" , $color = ''), false, INFO); 		
 	
 		//Toolbox::logInFile("procedimientos", " delete: " . print_r($item, TRUE) . "\r\n".$sql."\r\n"); 
