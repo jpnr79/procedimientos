@@ -1,6 +1,3 @@
-if (!class_exists('Ticket') && defined('GLPI_ROOT')) {
-	require_once(GLPI_ROOT . '/inc/ticket.class.php');
-// End of file
 <?php
 /*
    ----------------------------------------------------------
@@ -99,10 +96,10 @@ function plugin_procedimientos_install() {
 	// }
 	// [FINAL] [CRI] JMZ18G MIGRACIÓN GLPI 9.5.7 - 1 columnas utilizan el tipo de campo de fecha y hora en desuso.
 
-   PluginProcedimientosProfile::initProfile();
-   PluginProcedimientosProfile::createFirstAccess($_SESSION['glpiactiveprofile']['id']);	
-   
+	PluginProcedimientosProfile::initProfile();
+	PluginProcedimientosProfile::createFirstAccess($_SESSION['glpiactiveprofile']['id']);
 	return true;
+}
 // Uninstall process for plugin : need to return true if succeeded
 function plugin_procedimientos_uninstall() {
 	/*global $DB;
