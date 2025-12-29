@@ -70,48 +70,15 @@ return plugin_procedimientos_jointype($condition);
 
  
 //[INICIO] [CRI] jmz18g  Devuelve un listado de id's para hacer un WHERE id IN (1,2,3,5)
- function plugin_procedimientos_jointype($array) {
-	
-$elementos=COUNT($array);
-$indices="";
-$indice=1;
-
-foreach ($array as $clave=>$valor) {
-
-if (empty($indices)) {
-
-	if ($elementos==$indice) {
-	
-	$indices .= $valor;
-	
-	} else { 
-	
-	$indices .= $valor."'";
-	
+function plugin_procedimientos_jointype($array) {
+	if (!is_array($array) || count($array) === 0) {
+		return '';
 	}
-	
-} else {
-if ($elementos==$indice){
-
-	$indices .= ", '".$valor."";	
-
-} else {
-
-	$indices .= ", '".$valor."'";
-	
-		procedimientos_log($__msg);
-	
-$indice++;
-
+	$ids = array_map('intval', $array);
+	return implode(',', $ids);
 }
-	procedimientos_log($__msg);
-return $indices;
-
-}	
 
 //[FINAL] [CRI] jmz18g  Devuelve un listado de id's para hacer un WHERE id IN (1,2,3,5)
-
-
 //Comprueba si para el procedimiento indicado existe un grupo dado
  function plugin_procedimientos_existeGrupo($procedimientos_id, $groups_id) {
 	
