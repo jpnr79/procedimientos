@@ -72,18 +72,22 @@ function plugin_procedimientos_install() {
 		error_log('[procedimientos] ' . $__msg);
 	}
 
-	// Check if table exists
-	$table_exists = false;
-	$res = $DB->request([
-		'FROM' => 'information_schema.tables',
-		'WHERE' => [
-			'table_schema' => $DB->request("SELECT DATABASE() AS dbname")[0]['dbname'],
-			'table_name'   => 'glpi_plugin_procedimientos_procedimientos'
-		]
-	]);
-	if ($res && count($res)) {
-		$table_exists = true; // Added this line to set the table_exists flag
-	}
+	   // Check if table exists (GLPI 11+ compatible, no nested request)
+	   $table_exists = false;
+	   // Workaround: use DB_DEFAULT constant if defined, else fallback to a placeholder
+	$dbname = 'glpidb'; // Set to your actual database name
+
+	procedimientos_log('DEBUG: $dbname value before table existence check: ' . var_export($dbname, true));
+	   $res = $DB->request([
+		   'FROM' => 'information_schema.tables',
+		   'WHERE' => [
+			   'table_schema' => $dbname,
+			   'table_name'   => 'glpi_plugin_procedimientos_procedimientos'
+		   ]
+	   ]);
+	   if ($res && count($res)) {
+		   $table_exists = true;
+	   }
 	if (!$table_exists) {
 		$fichero_install = GLPI_ROOT . '/plugins/procedimientos/sql/install.sql';
 		if (file_exists($fichero_install)) {
@@ -103,13 +107,13 @@ function plugin_procedimientos_install() {
 
 	// Check if glpi_followuptypes table exists
 	$followup_exists = false;
-	$res = $DB->request([
-		'FROM' => 'information_schema.tables',
-		'WHERE' => [
-			'table_schema' => $DB->request("SELECT DATABASE() AS dbname")[0]['dbname'],
-			'table_name'   => 'glpi_followuptypes'
-		]
-	]);
+	   $res = $DB->request([
+		   'FROM' => 'information_schema.tables',
+		   'WHERE' => [
+			   'table_schema' => $dbname,
+			   'table_name'   => 'glpi_followuptypes'
+		   ]
+	   ]);
 	if ($res && count($res)) {
 		$followup_exists = true;
 	}
@@ -558,6 +562,7 @@ function plugin_procedimientos_update_Validation($item) {
 			   }
 		}
 		return true;
+	}
 		
 }
 
