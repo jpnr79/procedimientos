@@ -11,6 +11,17 @@
  */
 include_once (GLPI_ROOT . "/plugins/procedimientos/inc/function.procedimientos.php");
 
+// Shared logging helper for this plugin to support GLPI 11+ fallbacks
+if (!function_exists('procedimientos_log')) {
+	function procedimientos_log(string $message): void {
+		if (class_exists('Toolbox') && method_exists('Toolbox', 'logInFile')) {
+			Toolbox::logInFile('procedimientos', $message);
+		} else {
+			error_log('[procedimientos] ' . $message);
+		}
+	}
+}
+
 // [INICIO] [CRI] JMZ18G MIGRACIÓN GLPI 9.5.7 - 1 columnas utilizan el tipo de campo de fecha y hora en desuso.
 function procedimientos_notMigratedDatetime() {
 	global $DB;
