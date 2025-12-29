@@ -72,105 +72,16 @@ function plugin_procedimientos_install() {
 		error_log('[procedimientos] ' . $__msg);
 	}
 
-	   // Check if table exists (GLPI 11+ compatible, no nested request)
-	   $table_exists = false;
-	   // Workaround: use DB_DEFAULT constant if defined, else fallback to a placeholder
-	$dbname = 'glpidb'; // Set to your actual database name
+	// Use GLPI core Migration class for all schema changes
+	include_once(GLPI_ROOT . '/plugins/procedimientos/inc/procedimiento.class.php');
+	$migration = new \Migration('2.2.1');
+	PluginProcedimientosProcedimiento::install($migration);
 
-	procedimientos_log('DEBUG: $dbname value before table existence check: ' . var_export($dbname, true));
-	   $res = $DB->request([
-		   'FROM' => 'information_schema.tables',
-		   'WHERE' => [
-			   'table_schema' => $dbname,
-			   'table_name'   => 'glpi_plugin_procedimientos_procedimientos'
-		   ]
-	   ]);
-	   if ($res && count($res)) {
-		   $table_exists = true;
-	   }
-	if (!$table_exists) {
-		$fichero_install = GLPI_ROOT . '/plugins/procedimientos/sql/install.sql';
-		if (file_exists($fichero_install)) {
-			Session::addMessageAfterRedirect("Ejecutando fichero <strong><font color='#40b122'>INSTALL.sql</font></strong>", true);
-			$sql = file_get_contents($fichero_install);
-			foreach (explode(';', $sql) as $statement) {
-				$statement = trim($statement);
-				if ($statement) {
-					   $DB->request($statement);
-				}
-			}
-			Session::addMessageAfterRedirect("<br>Scripts ejecutado<br>", true);
-		} else {
-			Session::addMessageAfterRedirect("No existe el fichero " . $fichero_install, true);
-		}
-	}
-
-	// Check if glpi_followuptypes table exists
-	$followup_exists = false;
-	   $res = $DB->request([
-		   'FROM' => 'information_schema.tables',
-		   'WHERE' => [
-			   'table_schema' => $dbname,
-			   'table_name'   => 'glpi_followuptypes'
-		   ]
-	   ]);
-	if ($res && count($res)) {
-		$followup_exists = true;
-	}
-	if ($table_exists && !$followup_exists) {
-		   $DB->request("CREATE TABLE IF NOT EXISTS `glpi_followuptypes` (
-			   `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-			   `name` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-			   `comment` text COLLATE utf8mb4_unicode_ci,
-			   PRIMARY KEY (`id`),
-			   KEY `name` (`name`)
-		   ) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
-		   $DB->request("INSERT INTO `glpi_followuptypes` (`id`,`name`,`comment`) VALUES (9,'Comunicación con el solicitante','Cuando queramos informar al solicitante sobre el ticket. Seleccionar Privado \"No\"\r\n');");
-		   $DB->request("INSERT INTO `glpi_followuptypes` (`id`,`name`,`comment`) VALUES (10,'Comunicación entre técnicos','Cuando reasignamos el ticket a otro grupo técnico y le queremos pasar información');");
-		   $DB->request("INSERT INTO `glpi_followuptypes` (`id`,`name`,`comment`) VALUES (11,'Mal escalado','Cuando nos llega un ticket que no es para nuestro grupo.');");
-		   $DB->request("INSERT INTO `glpi_followuptypes` (`id`,`name`,`comment`) VALUES (12,'Petición de Información','Cuando necesitamos información del solicitante para poder tramitar el ticket. Debe de seleccionarse Privado \"No\"');");
-		   $DB->request("INSERT INTO `glpi_followuptypes` (`id`,`name`,`comment`) VALUES (13,'Anotación','');");
-
-		// Check if field exists
-		$field_exists = false;
-		$res = $DB->request([
-			'FROM' => 'information_schema.columns',
-			'WHERE' => [
-				'table_schema' => $DB->request("SELECT DATABASE() AS dbname")[0]['dbname'],
-				'table_name'   => 'glpi_itilfollowups',
-				'column_name'  => 'followuptypes_id'
-			]
-		]);
-		if ($res && count($res)) {
-			$field_exists = true;
-		}
-		if (!$field_exists) {
-			   $DB->request("ALTER TABLE `glpi_itilfollowups` ADD COLUMN `followuptypes_id` BIGINT UNSIGNED NULL DEFAULT NULL AFTER `sourceof_items_id`;");
-		}
-	}
-// [INICIO] [CRI] - JMZ18G - 06/11/2020 Añadir actiontime al detalle de la tarea
-	$field_exists = false;
-	$res = $DB->request([
-		'FROM' => 'information_schema.columns',
-		'WHERE' => [
-			'table_schema' => $DB->request("SELECT DATABASE() AS dbname")[0]['dbname'],
-			'table_name'   => 'glpi_plugin_procedimientos_tareas',
-			'column_name'  => 'actiontime'
-		]
-	]);
-	   if (!$res || !count($res)) {
-		   $DB->request("ALTER TABLE `glpi_plugin_procedimientos_tareas` ADD COLUMN `actiontime` BIGINT UNSIGNED NULL DEFAULT 0 AFTER `tasktemplates_id`;");
-	   }
+	// All followuptypes table/column creation and inserts should be handled in the migration class
+// All column creation should be handled in the migration class
 // [FIN] [CRI] - JMZ18G - 06/11/2020 Añadir actiontime al detalle de la tarea
 
-// [INICIO] [CRI] - JMZ18G - 06/05/2022 Añadir accion Eliminar Técnicos
-
-$query = "SELECT * FROM glpi_plugin_procedimientos_tipoaccions where uuid = 'c0dff0d6-9e4abb40-5a61e7e35e2256.00000009';";
-	   $result = $DB->request($query);
-			   if (class_exists('Plugin') && (Plugin::isPluginInstalled('formcreator') || Plugin::isPluginActivated('formcreator'))) {
-				   $DB->request("UPDATE glpi_plugin_formcreator_targettickets AS a LEFT join glpi_plugin_procedimientos_procedimientos_forms b on  a.id = b.plugin_formcreator_targettickets_id and b.plugin_formcreator_targettickets_id IS NOT NULL SET a.plugin_procedimientos_procedimientos_id = IF(b.plugin_procedimientos_procedimientos_id IS NOT NULL, b.plugin_procedimientos_procedimientos_id, 0)");
-			   }
-		}
+// All DDL/DML should be handled in the migration class
 	// *******************************************************************************************
 	//  [FINAL] [CRI] JMZ18G ASOCIAR AL PLUGIN EL DESTINO DEL TICKET DE FORMCREATOR 
 	// *******************************************************************************************

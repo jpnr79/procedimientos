@@ -17,6 +17,39 @@ if (!defined('GLPI_ROOT')) {
 
 // Class of the defined type
 class PluginProcedimientosProcedimiento extends CommonDBTM {
+
+      /**
+       * Install or migrate plugin database schema for this class
+       * @param Migration $migration
+       */
+      public static function install(Migration $migration) {
+         global $DB;
+         // Example: create one table (repeat for all tables from install.sql)
+         $table = 'glpi_plugin_procedimientos_accions';
+         if (!$DB->tableExists($table)) {
+            $migration->displayMessage("Installing $table");
+            $query = "CREATE TABLE IF NOT EXISTS `$table` (
+               `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+               `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+               `comment` longtext COLLATE utf8mb4_unicode_ci,
+               `date_mod` TIMESTAMP NULL DEFAULT NULL,
+               `is_recursive` tinyint(1) NOT NULL DEFAULT '0',
+               `entities_id` BIGINT UNSIGNED NOT NULL DEFAULT '0',
+               `is_deleted` tinyint(1) NOT NULL DEFAULT '0',
+               `plugin_procedimientos_tipoaccions_id` tinyint(1) unsigned NOT NULL DEFAULT '0',
+               `uuid` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+               PRIMARY KEY (`id`),
+               KEY `name` (`name`),
+               KEY `entities_id` (`entities_id`),
+               KEY `is_recursive` (`is_recursive`),
+               KEY `date_mod` (`date_mod`),
+               KEY `type` (`plugin_procedimientos_tipoaccions_id`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+            $DB->doQuery($query);
+         }
+         // Repeat for all other tables from install.sql...
+         // Add columns, keys, and initial data as needed using $migration and $DB->doQuery
+      }
    
    public $dohistory=true;
 
