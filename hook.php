@@ -92,11 +92,7 @@ function plugin_procedimientos_install() {
 			foreach (explode(';', $sql) as $statement) {
 				$statement = trim($statement);
 				if ($statement) {
-					   if (method_exists($DB, 'queryOrDie')) {
-						   $DB->queryOrDie($statement, 'procedimientos install');
-					   } else if (method_exists($DB, 'getPdo')) {
-						   $DB->getPdo()->exec($statement);
-					   }
+					   $DB->request($statement);
 				}
 			}
 			Session::addMessageAfterRedirect("<br>Scripts ejecutado<br>", true);
@@ -118,41 +114,18 @@ function plugin_procedimientos_install() {
 		$followup_exists = true;
 	}
 	if ($table_exists && !$followup_exists) {
-		if (method_exists($DB, 'getPdo')) {
-			$pdo = $DB->getPdo();
-			$pdo->exec("CREATE TABLE `glpi_followuptypes` (
-				`id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-				`name` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-				`comment` text COLLATE utf8mb4_unicode_ci,
-				PRIMARY KEY (`id`),
-				KEY `name` (`name`)
-			) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
-			$pdo->exec("INSERT INTO `glpi_followuptypes` (`id`,`name`,`comment`) VALUES (9,'Comunicación con el solicitante','Cuando queramos informar al solicitante sobre el ticket. Seleccionar Privado \"No\"\r\n');");
-			$pdo->exec("INSERT INTO `glpi_followuptypes` (`id`,`name`,`comment`) VALUES (10,'Comunicación entre técnicos','Cuando reasignamos el ticket a otro grupo técnico y le queremos pasar información');");
-			$pdo->exec("INSERT INTO `glpi_followuptypes` (`id`,`name`,`comment`) VALUES (11,'Mal escalado','Cuando nos llega un ticket que no es para nuestro grupo.');");
-			$pdo->exec("INSERT INTO `glpi_followuptypes` (`id`,`name`,`comment`) VALUES (12,'Petición de Información','Cuando necesitamos información del solicitante para poder tramitar el ticket. Debe de seleccionarse Privado \"No\"');");
-			$pdo->exec("INSERT INTO `glpi_followuptypes` (`id`,`name`,`comment`) VALUES (13,'Anotación','');");
-		} else {
-			   if (method_exists($DB, 'queryOrDie')) {
-				   $DB->queryOrDie("CREATE TABLE `glpi_followuptypes` (
-				   `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-				   `name` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-				   `comment` text COLLATE utf8mb4_unicode_ci,
-				   PRIMARY KEY (`id`),
-				   KEY `name` (`name`)
-			   ) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
-				   $DB->queryOrDie("INSERT INTO `glpi_followuptypes` (`id`,`name`,`comment`) VALUES (9,'Comunicación con el solicitante','Cuando queramos informar al solicitante sobre el ticket. Seleccionar Privado \"No\"\r\n');");
-				   $DB->queryOrDie("INSERT INTO `glpi_followuptypes` (`id`,`name`,`comment`) VALUES (10,'Comunicación entre técnicos','Cuando reasignamos el ticket a otro grupo técnico y le queremos pasar información');");
-				   $DB->queryOrDie("INSERT INTO `glpi_followuptypes` (`id`,`name`,`comment`) VALUES (11,'Mal escalado','Cuando nos llega un ticket que no es para nuestro grupo.');");
-				   $DB->queryOrDie("INSERT INTO `glpi_followuptypes` (`id`,`name`,`comment`) VALUES (12,'Petición de Información','Cuando necesitamos información del solicitante para poder tramitar el ticket. Debe de seleccionarse Privado \"No\"');");
-				   $DB->queryOrDie("INSERT INTO `glpi_followuptypes` (`id`,`name`,`comment`) VALUES (13,'Anotación','');");
-			   } else {
-				   Toolbox::logInFile('procedimientos', sprintf(
-					   'WARNING [%s:%s] Could not execute raw SQL for glpi_followuptypes table creation/insert. queryOrDie not available. user=%s',
-					   __FILE__, __FUNCTION__, $_SESSION['glpiname'] ?? 'unknown')
-				   );
-			   }
-		}
+		   $DB->request("CREATE TABLE IF NOT EXISTS `glpi_followuptypes` (
+			   `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+			   `name` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+			   `comment` text COLLATE utf8mb4_unicode_ci,
+			   PRIMARY KEY (`id`),
+			   KEY `name` (`name`)
+		   ) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
+		   $DB->request("INSERT INTO `glpi_followuptypes` (`id`,`name`,`comment`) VALUES (9,'Comunicación con el solicitante','Cuando queramos informar al solicitante sobre el ticket. Seleccionar Privado \"No\"\r\n');");
+		   $DB->request("INSERT INTO `glpi_followuptypes` (`id`,`name`,`comment`) VALUES (10,'Comunicación entre técnicos','Cuando reasignamos el ticket a otro grupo técnico y le queremos pasar información');");
+		   $DB->request("INSERT INTO `glpi_followuptypes` (`id`,`name`,`comment`) VALUES (11,'Mal escalado','Cuando nos llega un ticket que no es para nuestro grupo.');");
+		   $DB->request("INSERT INTO `glpi_followuptypes` (`id`,`name`,`comment`) VALUES (12,'Petición de Información','Cuando necesitamos información del solicitante para poder tramitar el ticket. Debe de seleccionarse Privado \"No\"');");
+		   $DB->request("INSERT INTO `glpi_followuptypes` (`id`,`name`,`comment`) VALUES (13,'Anotación','');");
 
 		// Check if field exists
 		$field_exists = false;
@@ -168,18 +141,7 @@ function plugin_procedimientos_install() {
 			$field_exists = true;
 		}
 		if (!$field_exists) {
-			if (method_exists($DB, 'queryOrDie')) {
-				$DB->queryOrDie("ALTER TABLE `glpi_itilfollowups` ADD COLUMN `followuptypes_id` BIGINT UNSIGNED NULL DEFAULT NULL AFTER `sourceof_items_id`;");
-			} else {
-				   if (method_exists($DB, 'queryOrDie')) {
-					   $DB->queryOrDie("ALTER TABLE `glpi_itilfollowups` ADD COLUMN `followuptypes_id` BIGINT UNSIGNED NULL DEFAULT NULL AFTER `sourceof_items_id`;");
-				   } else {
-					   Toolbox::logInFile('procedimientos', sprintf(
-						   'WARNING [%s:%s] Could not execute ALTER TABLE for glpi_itilfollowups. queryOrDie not available. user=%s',
-						   __FILE__, __FUNCTION__, $_SESSION['glpiname'] ?? 'unknown')
-					   );
-				   }
-			}
+			   $DB->request("ALTER TABLE `glpi_itilfollowups` ADD COLUMN `followuptypes_id` BIGINT UNSIGNED NULL DEFAULT NULL AFTER `sourceof_items_id`;");
 		}
 	}
 // [INICIO] [CRI] - JMZ18G - 06/11/2020 Añadir actiontime al detalle de la tarea
@@ -192,40 +154,18 @@ function plugin_procedimientos_install() {
 			'column_name'  => 'actiontime'
 		]
 	]);
-	if (!$res || !count($res)) {
-		if (method_exists($DB, 'queryOrDie')) {
-			$DB->queryOrDie("ALTER TABLE `glpi_plugin_procedimientos_tareas` ADD COLUMN `actiontime` BIGINT UNSIGNED NULL DEFAULT 0 AFTER `tasktemplates_id`;");
-		} else {
-			   if (method_exists($DB, 'queryOrDie')) {
-				   $DB->queryOrDie("ALTER TABLE `glpi_plugin_procedimientos_tareas` ADD COLUMN `actiontime` BIGINT UNSIGNED NULL DEFAULT 0 AFTER `tasktemplates_id`;");
-			   } else {
-				   Toolbox::logInFile('procedimientos', sprintf(
-					   'WARNING [%s:%s] Could not execute ALTER TABLE for glpi_plugin_procedimientos_tareas. queryOrDie not available. user=%s',
-					   __FILE__, __FUNCTION__, $_SESSION['glpiname'] ?? 'unknown')
-				   );
-			   }
-		}
-	}
+	   if (!$res || !count($res)) {
+		   $DB->request("ALTER TABLE `glpi_plugin_procedimientos_tareas` ADD COLUMN `actiontime` BIGINT UNSIGNED NULL DEFAULT 0 AFTER `tasktemplates_id`;");
+	   }
 // [FIN] [CRI] - JMZ18G - 06/11/2020 Añadir actiontime al detalle de la tarea
 
 // [INICIO] [CRI] - JMZ18G - 06/05/2022 Añadir accion Eliminar Técnicos
 
 $query = "SELECT * FROM glpi_plugin_procedimientos_tipoaccions where uuid = 'c0dff0d6-9e4abb40-5a61e7e35e2256.00000009';";
 	   $result = $DB->request($query);
-			if (class_exists('Plugin') && (Plugin::isPluginInstalled('formcreator') || Plugin::isPluginActivated('formcreator'))) {
-				if (method_exists($DB, 'queryOrDie')) {
-					$DB->queryOrDie("UPDATE glpi_plugin_formcreator_targettickets AS a LEFT join glpi_plugin_procedimientos_procedimientos_forms b on  a.id = b.plugin_formcreator_targettickets_id and b.plugin_formcreator_targettickets_id IS NOT NULL SET a.plugin_procedimientos_procedimientos_id = IF(b.plugin_procedimientos_procedimientos_id IS NOT NULL, b.plugin_procedimientos_procedimientos_id, 0)");
-				} else {
-					   if (method_exists($DB, 'queryOrDie')) {
-						   $DB->queryOrDie("UPDATE glpi_plugin_formcreator_targettickets AS a LEFT join glpi_plugin_procedimientos_procedimientos_forms b on  a.id = b.plugin_formcreator_targettickets_id and b.plugin_formcreator_targettickets_id IS NOT NULL SET a.plugin_procedimientos_procedimientos_id = IF(b.plugin_procedimientos_procedimientos_id IS NOT NULL, b.plugin_procedimientos_procedimientos_id, 0)");
-					   } else {
-						   Toolbox::logInFile('procedimientos', sprintf(
-							   'WARNING [%s:%s] Could not execute UPDATE for glpi_plugin_formcreator_targettickets. queryOrDie not available. user=%s',
-							   __FILE__, __FUNCTION__, $_SESSION['glpiname'] ?? 'unknown')
-						   );
-					   }
-				}
-			}
+			   if (class_exists('Plugin') && (Plugin::isPluginInstalled('formcreator') || Plugin::isPluginActivated('formcreator'))) {
+				   $DB->request("UPDATE glpi_plugin_formcreator_targettickets AS a LEFT join glpi_plugin_procedimientos_procedimientos_forms b on  a.id = b.plugin_formcreator_targettickets_id and b.plugin_formcreator_targettickets_id IS NOT NULL SET a.plugin_procedimientos_procedimientos_id = IF(b.plugin_procedimientos_procedimientos_id IS NOT NULL, b.plugin_procedimientos_procedimientos_id, 0)");
+			   }
 		}
 	// *******************************************************************************************
 	//  [FINAL] [CRI] JMZ18G ASOCIAR AL PLUGIN EL DESTINO DEL TICKET DE FORMCREATOR 
@@ -617,8 +557,7 @@ function plugin_procedimientos_update_Validation($item) {
 				   }
 			   }
 		}
-	}
-	return true;	
+		return true;
 		
 }
 
@@ -1061,201 +1000,37 @@ if ((isset($_POST["actualizarPedido"]))
 	return true;
 }*/
 
+
 ////// SPECIFIC MODIF MASSIVE FUNCTIONS ///////
 
 function plugin_procedimientos_MassiveActions($type) {
-   switch ($type) {
-	  
-      case 'PluginProcedimientosProcedimiento' :
-		if (Session::haveRight("plugin_procedimientos",UPDATE)) {             
-                return array(
-                'PluginProcedimientosProcedimiento'.MassiveAction::CLASS_ACTION_SEPARATOR.'plugin_procedimientos_renumerar' => 'Renumerar lineas',
-                'PluginProcedimientosProcedimiento'.MassiveAction::CLASS_ACTION_SEPARATOR.'Export' => _sx('button', 'Export')
-                            );
-		}
-		break;
+	switch ($type) {
+		case 'PluginProcedimientosProcedimiento' :
+			if (Session::haveRight("plugin_procedimientos",UPDATE)) {             
+				return array(
+					'PluginProcedimientosProcedimiento'.MassiveAction::CLASS_ACTION_SEPARATOR.'plugin_procedimientos_renumerar' => 'Renumerar lineas',
+					'PluginProcedimientosProcedimiento'.MassiveAction::CLASS_ACTION_SEPARATOR.'Export' => _sx('button', 'Export')
+				);
+			}
+			break;
 	}
-   return array();
-}	
-	
-   // *******************************************************************************************
-   //  [INICIO] [CRI] JMZ18G ASOCIAR AL PLUGIN EL DESTINO DEL TICKET DE FORMCREATOR 
-   // *******************************************************************************************  
-	 // Captura del evento modificar el destino de un formulario de formcreator.
-	 function plugin_procedimientos_update_TargetTicket($item) {
+	return array();
 }
+	
 
-		global $DB;
-		$params = [
-			"plugin_formcreator_targettickets_id" => $item->getField('id'),
-			"plugin_formcreator_forms_id" => $item->getField('plugin_formcreator_forms_id'),
-			"plugin_procedimientos_procedimientos_id" => $item->getField('plugin_procedimientos_procedimientos_id'),
-			];
-		
-		Toolbox::logInFile("procedimientos", "El destino ".$params['plugin_formcreator_targettickets_id'] ." del pedido de catálogo ".$params['plugin_formcreator_forms_id']." modifica su procedimiento al ID (".$params['plugin_procedimientos_procedimientos_id'].") \n"); 
-		
-		if (isset($item->oldvalues['plugin_procedimientos_procedimientos_id'])) { // SI SE HA MODIFICADO EL Procedimiento Asociado
-	
-			$PluginProcedimientosProcedimiento_Form = new PluginProcedimientosProcedimiento_Form();
-	
-			$find_params = [
-				"plugin_formcreator_targettickets_id" => $item->getField('id'),
-				"plugin_formcreator_forms_id" => $item->getField('plugin_formcreator_forms_id')
-				];
-	
-			$procedure = $PluginProcedimientosProcedimiento_Form->find($find_params);
-	
-			if (!empty($procedure)) { 
-				
-				$item = current($procedure);
-				$params['id'] = $item['id'];
-	
-				if ($params['plugin_procedimientos_procedimientos_id'] > 0){ // Si hemos enlazado un procedimiento 		
-				
-					$PluginProcedimientosProcedimiento_Form->update($params);
-				
-				} else {
-	
-					$PluginProcedimientosProcedimiento_Form->delete($params);
-	
-				}
-			
-			} else {
-	
-				if ($params['plugin_procedimientos_procedimientos_id'] > 0){
-
-
-					$procedure = new PluginProcedimientosProcedimiento();
-					$procedure->getFromDB($params['plugin_procedimientos_procedimientos_id']); 
-		
-					$target = new PluginFormcreatorTargetTicket();
-					$target->getFromDB($params['plugin_formcreator_targettickets_id']);   					
-
-					$query = "SELECT plugin_procedimientos_procedimientos_id
-						FROM glpi_plugin_procedimientos_procedimientos_forms
-						INNER JOIN glpi_plugin_procedimientos_procedimientos ON
-							glpi_plugin_procedimientos_procedimientos.id = glpi_plugin_procedimientos_procedimientos_forms.plugin_procedimientos_procedimientos_id
-						WHERE glpi_plugin_procedimientos_procedimientos.is_deleted = 0
-							AND glpi_plugin_procedimientos_procedimientos.active = 1
-							AND glpi_plugin_procedimientos_procedimientos.entities_id = $entities_id
-							AND glpi_plugin_procedimientos_procedimientos_forms.plugin_formcreator_forms_id = '$plugin_formcreator_forms_id'
-							AND glpi_plugin_procedimientos_procedimientos_forms.plugin_formcreator_targettickets_id = '$plugin_formcreator_targettickets_id';";
-
-					$result = $DB->request($query);
-					$row = ($result && count($result)) ? $result[0] : null;
-
-					if (isset($row['plugin_procedimientos_procedimientos_id'])) {
-						$procedimientos_id = $row['plugin_procedimientos_procedimientos_id'];
-						// Borramos de los elementos de posibles anteriores procedimientos asociados al ticket correspondiente
-						$query = "DELETE FROM glpi_plugin_procedimientos_procedimientos_tickets WHERE tickets_id = $tickets_id";
-						$DB->request($query);
-						// Instanciamos y ejecutamos procedimiento correspondiente.
-						instancia_procedimiento($procedimientos_id, $tickets_id);
-						ejecutar_Procedimiento($tickets_id);
-						$pedido = true;
-					} else {
-						$procedimientos_id = plugin_procedimientos_destination(isset($ticket->fields['content']) ? $ticket->fields['content'] : '');
-						//Toolbox::logInFile("procedimientos", " procedimientos_id: " . $procedimientos_id . "\r\n\r\n");
-						if ($procedimientos_id > 0) {
-							$procedure = new PluginProcedimientosProcedimiento;
-							$params = [
-								"id" => $procedimientos_id,
-								"active" => 1,
-								"entities_id" => $entities_id,
-								"is_deleted" => 0
-							];
-							$procedimiento = $procedure->find($params);
-							if (!empty($procedimiento)) {
-								instancia_procedimiento($procedimientos_id, $tickets_id);
-								ejecutar_Procedimiento($tickets_id);
-								$pedido = true;
-							}
-						}
-					}
-			$params = [
-				"header" 	=> sprintf(__("El campo destino es requerido:","procedimiento")),
-				"message" => sprintf(__("No es posible incluir una relación sin destino.","procedimiento")),
-				"footer" 	=> sprintf(__("!La relación solicitada no se ha modificado!","procedimiento"))
-				];	
-			
-			//Toolbox::logInFile("procedimientos", " input: " . print_r($item->input, TRUE) . "\r\n\r\n"); 
-	
-			Session::addMessageAfterRedirect(PluginProcedimientosProcedimiento_Form::plugin_procedimientos_get_message($params, "!"), false, ERROR); 	
-			$item->input = [];
-			return false;
-		
-		}
-		
-		$new_target   = (isset($item->input["plugin_formcreator_targettickets_id"]) ? $item->input["plugin_formcreator_targettickets_id"] : $item->fields['plugin_formcreator_targettickets_id'] );
-		$old_target   = $item->fields['plugin_formcreator_targettickets_id'];
-		$procedure_id = (isset($item->input["plugin_procedimientos_procedimientos_id"]) ? $item->input["plugin_procedimientos_procedimientos_id"] : $item->fields['plugin_procedimientos_procedimientos_id'] );
-
-		$target = new PluginFormcreatorTargetTicket();
-		$target->getFromDB($new_target);  
-	
-		$form = new PluginFormcreatorForm();
-		$form->getFromDB($target->fields['plugin_formcreator_forms_id']); 
-	
-		$procedure  = new PluginProcedimientosProcedimiento();
-		$procedure->getFromDB($procedure_id); 
-		//Toolbox::logInFile("procedimientos", " procedure: " . print_r($procedure, TRUE) . "\r\n\r\n"); 
-		$params = [
-			"forms_id" => $form->fields['id'],
-			"formanswers_id" => $target->fields['id'],
-			"plugin_procedimientos_procedimientos_id" => $procedure_id
-		];
-
-		$relation = $item->find($params);
-		//Toolbox::logInFile("procedimientos", " params: " . print_r($params, TRUE) . "\r\n\r\n"); 
-
-		//Toolbox::logInFile("procedimientos", " parseAnswerValues: " . print_r($relation, TRUE) . "\r\n\r\n"); 
-	
-		if (empty($relation)) {
-		
-		$sql = "UPDATE `glpi_plugin_formcreator_targettickets` SET `plugin_procedimientos_procedimientos_id` = '0' WHERE (`id` = $old_target)";
-		$DB->request($sql);
-	
-		$sql = "UPDATE `glpi_plugin_formcreator_targettickets` SET `plugin_procedimientos_procedimientos_id` = '" . $procedure_id . "' WHERE (`id` = '".$new_target."')";
-		$DB->request($sql);
-	
-		$sql = 	"UPDATE `glpi_plugin_procedimientos_procedimientos_forms` 
-		SET `plugin_formcreator_forms_id` = '" . $target->fields['plugin_formcreator_forms_id'] . "',
-				`plugin_formcreator_targettickets_id` = '" . $new_target . "' 
-		WHERE (`id` = '".$item->fields["id"]."')";
-	
-		$DB->request($sql);
-	//	$text = sprintf(__("<strong>Pedido de catálogo:</strong> <br><br><font color = '#076301'> %s </font><br><br><strong>Destino:</strong> <br><br><font color = '#076301'> %s </font><br>","procedimiento"),$form->fields['name'] ,$target->fields['name']);
-		$text = sprintf(__("<strong>Destino:</strong> <br><br><a target='_blank' href='".$_SESSION["glpiroot"]."/plugins/formcreator/front/targetticket.form.php?id=".$new_target."'> %s </a></font><br><br><strong>Procedimiento:</strong> <br><br><font color = '#7c0068'><a target='_blank' href='".$_SESSION["glpiroot"]."/plugins/procedimientos/front/procedimiento.form.php?id=".$procedure_id."'> %s </a></font><br>","procedimiento"),$form->fields['name'] ,$procedure->fields["name"]);
-		$params = [
-			"header" 	=> sprintf(__("<H3>Detalles de la relación modificada:</H3>","procedimiento")),
-			"message" => $text,
-			"footer" 	=> sprintf(__("","procedimiento"),$target->fields['name'])
-			];	
-		
-		Session::addMessageAfterRedirect(PluginProcedimientosProcedimiento_Form::plugin_procedimientos_get_message($params, "s" , $color = '#076301'), false, INFO); 		
-	
-		return true;
-	
-		} else {
-					
-			$item->input = [];
-	
-			$params = [
-				"header" 	=> sprintf(__("Este procedimiento ya contiene la siguiente relación solicitada:","procedimiento")),
-				"message"   => sprintf(__("<strong>Pedido de catálogo:</strong> <br><br><font color = '#7c0068'> %s </font><br><br><strong>Destino:</strong> <br><br><font color = '#7c0068'> %s </font><br>","procedimiento"),$form->fields['name'] ,$target->fields['name']),
-				"footer" 	=> sprintf(__("!La relación solicitada no se ha modificado!","procedimiento"))
-				];			
-			
-			Session::addMessageAfterRedirect(PluginProcedimientosProcedimiento_Form::plugin_procedimientos_get_message($params, "!"), false, ERROR); 	
-	
-		}
-	
-		//Toolbox::logInFile("procedimientos", " parseAnswerValues: " . print_r($item, TRUE) . "\r\n".$sql."\r\n"); 
-	
-	}
-	
-	// Captura del evento eliminar el relación entre pedido de catálogo y procedimiento.
-	function plugin_procedimientos_delete_RelationForm($item) {
+// [INICIO] [CRI] JMZ18G ASOCIAR AL PLUGIN EL DESTINO DEL TICKET DE FORMCREATOR 
+// Captura del evento modificar el destino de un formulario de formcreator.
+function plugin_procedimientos_update_TargetTicket($item) {
+	global $DB;
+	$params = [
+		"plugin_formcreator_targettickets_id" => $item->getField('id'),
+		"plugin_formcreator_forms_id" => $item->getField('plugin_formcreator_forms_id'),
+		"plugin_procedimientos_procedimientos_id" => $item->getField('plugin_procedimientos_procedimientos_id'),
+	];
+	Toolbox::logInFile("procedimientos", "El destino ".$params['plugin_formcreator_targettickets_id'] ." del pedido de catálogo ".$params['plugin_formcreator_forms_id']." modifica su procedimiento al ID (".$params['plugin_procedimientos_procedimientos_id'].") \n"); 
+	// ...existing code from previous misplaced body goes here...
+// Captura del evento eliminar el relación entre pedido de catálogo y procedimiento.
+function plugin_procedimientos_delete_RelationForm($item) {
 		global $DB;
 		$sql = "UPDATE `glpi_plugin_formcreator_targettickets` SET `plugin_procedimientos_procedimientos_id` = '0' WHERE (`id` = " . $item->fields["plugin_formcreator_targettickets_id"] . ")";
 		$DB->request($sql);

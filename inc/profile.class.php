@@ -163,13 +163,14 @@ class PluginProcedimientosProfile extends Profile {
             ProfileRight::addProfileRights(array($data['field']));
          }
       }
-      foreach ($DB->request('glpi_profilerights', [
+      foreach ($DB->request([
+         'FROM' => 'glpi_profilerights',
          'WHERE' => [
             'profiles_id' => $_SESSION['glpiactiveprofile']['id'],
             'name' => ['LIKE', '%plugin_procedimientos%']
          ]
       ]) as $prof) {
-         $_SESSION['glpiactiveprofile'][$prof['name']] = $prof['rights']; 
+         $_SESSION['glpiactiveprofile'][$prof['name']] = $prof['rights'];
       }
    }
 
