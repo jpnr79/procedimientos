@@ -34,24 +34,25 @@ if (!class_exists('Toolbox')) {
 // [INICIO] [CRI] JMZ18G MIGRACIÓN GLPI 9.5.7 - 1 columnas utilizan el tipo de campo de fecha y hora en desuso.
 function procedimientos_notMigratedDatetime() {
 	global $DB;
-
+	// Get current DB name
+	$dbname = '';
+	$res = $DB->request("SELECT DATABASE() AS dbname");
+	if ($res && count($res) && isset($res[0]['dbname'])) {
+		$dbname = $res[0]['dbname'];
+	}
 	$result = $DB->request([
-		//	'COUNT'       => 'cpt',
-			'FROM'        => 'information_schema.columns',
-			'WHERE'       => [
-				 'information_schema.columns.table_schema' => $DB->dbdefault,
-				 'information_schema.columns.table_name'   => ['LIKE', 'glpi\_plugin\_procedimientos\_%'],
-				 'information_schema.columns.data_type'    => ['datetime']
-			]
+		'FROM'  => 'information_schema.columns',
+		'WHERE' => [
+			'table_schema' => $dbname,
+			'table_name'   => ['LIKE', 'glpi\_plugin\_procedimientos\_%'],
+			'data_type'    => ['datetime']
+		]
 	]);
-
-	while ($data = $result->next()) { 
-
-		// Convert datetime to timestamp
-		$query = "ALTER TABLE `".$data["TABLE_NAME"]."` MODIFY `".$data["COLUMN_NAME"]."` TIMESTAMP DEFAULT CURRENT_TIMESTAMP;";
-	//	echo $query;
-		$DB->doQuery($query);
-			
+	if ($result && count($result)) {
+		foreach ($result as $data) {
+			$query = "ALTER TABLE `".$data["TABLE_NAME"]."` MODIFY `".$data["COLUMN_NAME"]."` TIMESTAMP DEFAULT CURRENT_TIMESTAMP;";
+			$DB->request($query);
+		}
 	}
 
 }
@@ -62,81 +63,107 @@ function plugin_procedimientos_install() {
    global $DB;
 
    $__msg = "Plugin installation\n";
-   if (class_exists('Toolbox') && method_exists('Toolbox', 'logInFile')) {
-	   Toolbox::logInFile('procedimientos', $__msg);
-   } else {
-	   error_log('[procedimientos] ' . $__msg);
-   }
-	
-    if (!$DB->TableExists("glpi_plugin_procedimientos_procedimientos")){ 
-	
-		$fichero_install = GLPI_ROOT . '/plugins/procedimientos/sql/install.sql';
-		if (file_exists($fichero_install)){
-			Session::addMessageAfterRedirect("Ejecutando fichero <strong><font color='#40b122'>INSTALL.sql</font></strong>",true);
-			$DB->runFile($fichero_install);
-			Session::addMessageAfterRedirect("<br>Scripts ejecutado<br>",true);
-		} else {
-			Session::addMessageAfterRedirect("No existe el fichero ".$fichero_install,true);
-		} 		
-
-	}	
-	
-	
-    if (($DB->TableExists("glpi_plugin_procedimientos_procedimientos")) and (!$DB->TableExists("glpi_followuptypes"))){ 
-		   
-      $DB->doQuery("CREATE TABLE `glpi_followuptypes` (
-	  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-	  `name` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-	  `comment` text COLLATE utf8mb4_unicode_ci,
-	  PRIMARY KEY (`id`),
-	  KEY `name` (`name`)
-	) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
-
-	$DB->doQuery("INSERT INTO `glpi_followuptypes` (`id`,`name`,`comment`) VALUES (9,'Comunicación con el solicitante','Cuando queramos informar al solicitante sobre el ticket. Seleccionar Privado \"No\"\r\n');");
-	$DB->doQuery("INSERT INTO `glpi_followuptypes` (`id`,`name`,`comment`) VALUES (10,'Comunicación entre técnicos','Cuando reasignamos el ticket a otro grupo técnico y le queremos pasar información');");
-	$DB->doQuery("INSERT INTO `glpi_followuptypes` (`id`,`name`,`comment`) VALUES (11,'Mal escalado','Cuando nos llega un ticket que no es para nuestro grupo.');");
-	$DB->doQuery("INSERT INTO `glpi_followuptypes` (`id`,`name`,`comment`) VALUES (12,'Petición de Información','Cuando necesitamos información del solicitante para poder tramitar el ticket. Debe de seleccionarse Privado \"No\"');");
-	$DB->doQuery("INSERT INTO `glpi_followuptypes` (`id`,`name`,`comment`) VALUES (13,'Anotación','');");
-
-
-	if (!$DB->fieldExists("glpi_itilfollowups","followuptypes_id")){
-
-	$DB->doQuery("ALTER TABLE `glpi_itilfollowups` 
-	ADD COLUMN `followuptypes_id` BIGINT UNSIGNED NULL DEFAULT NULL AFTER `sourceof_items_id`;");
-
+	if (class_exists('Toolbox') && method_exists('Toolbox', 'logInFile')) {
+		Toolbox::logInFile('procedimientos', $__msg);
+	} else {
+		error_log('[procedimientos] ' . $__msg);
 	}
 
-   }
+	// Check if table exists
+	$table_exists = false;
+	$res = $DB->request([
+		'FROM' => 'information_schema.tables',
+		'WHERE' => [
+			'table_schema' => $DB->request("SELECT DATABASE() AS dbname")[0]['dbname'],
+			'table_name'   => 'glpi_plugin_procedimientos_procedimientos'
+		]
+	]);
+	if ($res && count($res)) {
+		$table_exists = true;
+	}
+	if (!$table_exists) {
+		$fichero_install = GLPI_ROOT . '/plugins/procedimientos/sql/install.sql';
+		if (file_exists($fichero_install)) {
+			Session::addMessageAfterRedirect("Ejecutando fichero <strong><font color='#40b122'>INSTALL.sql</font></strong>", true);
+			$sql = file_get_contents($fichero_install);
+			foreach (explode(';', $sql) as $statement) {
+				$statement = trim($statement);
+				if ($statement) {
+					$DB->request($statement);
+				}
+			}
+			Session::addMessageAfterRedirect("<br>Scripts ejecutado<br>", true);
+		} else {
+			Session::addMessageAfterRedirect("No existe el fichero " . $fichero_install, true);
+		}
+	}
+
+	// Check if glpi_followuptypes table exists
+	$followup_exists = false;
+	$res = $DB->request([
+		'FROM' => 'information_schema.tables',
+		'WHERE' => [
+			'table_schema' => $DB->request("SELECT DATABASE() AS dbname")[0]['dbname'],
+			'table_name'   => 'glpi_followuptypes'
+		]
+	]);
+	if ($res && count($res)) {
+		$followup_exists = true;
+	}
+	if ($table_exists && !$followup_exists) {
+		$DB->request("CREATE TABLE `glpi_followuptypes` (
+			`id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+			`name` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+			`comment` text COLLATE utf8mb4_unicode_ci,
+			PRIMARY KEY (`id`),
+			KEY `name` (`name`)
+		) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
+
+		$DB->request("INSERT INTO `glpi_followuptypes` (`id`,`name`,`comment`) VALUES (9,'Comunicación con el solicitante','Cuando queramos informar al solicitante sobre el ticket. Seleccionar Privado \"No\"\r\n');");
+		$DB->request("INSERT INTO `glpi_followuptypes` (`id`,`name`,`comment`) VALUES (10,'Comunicación entre técnicos','Cuando reasignamos el ticket a otro grupo técnico y le queremos pasar información');");
+		$DB->request("INSERT INTO `glpi_followuptypes` (`id`,`name`,`comment`) VALUES (11,'Mal escalado','Cuando nos llega un ticket que no es para nuestro grupo.');");
+		$DB->request("INSERT INTO `glpi_followuptypes` (`id`,`name`,`comment`) VALUES (12,'Petición de Información','Cuando necesitamos información del solicitante para poder tramitar el ticket. Debe de seleccionarse Privado \"No\"');");
+		$DB->request("INSERT INTO `glpi_followuptypes` (`id`,`name`,`comment`) VALUES (13,'Anotación','');");
+
+		// Check if field exists
+		$field_exists = false;
+		$res = $DB->request([
+			'FROM' => 'information_schema.columns',
+			'WHERE' => [
+				'table_schema' => $DB->request("SELECT DATABASE() AS dbname")[0]['dbname'],
+				'table_name'   => 'glpi_itilfollowups',
+				'column_name'  => 'followuptypes_id'
+			]
+		]);
+		if ($res && count($res)) {
+			$field_exists = true;
+		}
+		if (!$field_exists) {
+			$DB->request("ALTER TABLE `glpi_itilfollowups` ADD COLUMN `followuptypes_id` BIGINT UNSIGNED NULL DEFAULT NULL AFTER `sourceof_items_id`;");
+		}
+	}
 // [INICIO] [CRI] - JMZ18G - 06/11/2020 Añadir actiontime al detalle de la tarea
-	if (!$DB->fieldExists("glpi_plugin_procedimientos_tareas","actiontime")){
-
-	$DB->doQuery("ALTER TABLE `glpi_plugin_procedimientos_tareas` 
-	ADD COLUMN `actiontime` BIGINT UNSIGNED NULL DEFAULT 0 AFTER `tasktemplates_id`;");
-
+	$columns = $DB->list_fields('glpi_plugin_procedimientos_tareas');
+	if (!isset($columns['actiontime'])){
+		$DB->request("ALTER TABLE `glpi_plugin_procedimientos_tareas` ADD COLUMN `actiontime` BIGINT UNSIGNED NULL DEFAULT 0 AFTER `tasktemplates_id`;");
 	}
 // [FIN] [CRI] - JMZ18G - 06/11/2020 Añadir actiontime al detalle de la tarea
 
 // [INICIO] [CRI] - JMZ18G - 06/05/2022 Añadir accion Eliminar Técnicos
 
 $query = "SELECT * FROM glpi_plugin_procedimientos_tipoaccions where uuid = 'c0dff0d6-9e4abb40-5a61e7e35e2256.00000009';";
-
-if ($result = $DB->doQuery($query)) {
-	
-	if ($DB->numrows($result)==0) {
-
+$result = $DB->request($query);
+if (!$result || count($result) == 0) {
 	$params = [
-	
 		'entities_id' => 0, 
 		'is_recursive' => 1, 
 		'name' => 'Eliminar Técnicos',
 		'uuid' =>  'c0dff0d6-9e4abb40-5a61e7e35e2256.00000009',
-
 	];
-
-	$DB->insert("glpi_plugin_procedimientos_tipoaccions", $params);
-	
-	}
-
+	$fields = implode('`, `', array_keys($params));
+	$values = implode("', '", array_map('addslashes', array_values($params)));
+	$insert = "INSERT INTO `glpi_plugin_procedimientos_tipoaccions` (`$fields`) VALUES ('$values')";
+	$DB->request($insert);
 }
 
 // [FINAL] [CRI] - JMZ18G - 06/05/2022 Añadir accion Eliminar Técnicos
@@ -144,33 +171,16 @@ if ($result = $DB->doQuery($query)) {
   // *******************************************************************************************
   //  [INICIO] [CRI] JMZ18G ASOCIAR AL PLUGIN EL DESTINO DEL TICKET DE FORMCREATOR 
   // ******************************************************************************************* 
-	if (!$DB->fieldExists("glpi_plugin_procedimientos_procedimientos_forms","plugin_formcreator_targettickets_id")){
-
-		$DB->doQuery("ALTER TABLE `glpi_plugin_procedimientos_procedimientos_forms` 
-								ADD COLUMN `plugin_formcreator_targettickets_id` BIGINT UNSIGNED NULL DEFAULT 0 AFTER `plugin_formcreator_forms_id`,
-								DROP KEY `unicity`,
-								ADD UNIQUE KEY `unicity` (`plugin_procedimientos_procedimientos_id`,`plugin_formcreator_forms_id`, `plugin_formcreator_targettickets_id`)");
-
+	$columns = $DB->list_fields('glpi_plugin_procedimientos_procedimientos_forms');
+	if (!isset($columns['plugin_formcreator_targettickets_id'])){
+		$DB->request("ALTER TABLE `glpi_plugin_procedimientos_procedimientos_forms` ADD COLUMN `plugin_formcreator_targettickets_id` BIGINT UNSIGNED NULL DEFAULT 0 AFTER `plugin_formcreator_forms_id`, DROP KEY `unicity`, ADD UNIQUE KEY `unicity` (`plugin_procedimientos_procedimientos_id`,`plugin_formcreator_forms_id`, `plugin_formcreator_targettickets_id`)");
 		// Only execute update if formcreator table exists
 		if ($DB->TableExists("glpi_plugin_formcreator_targettickets")) {
-			$DB->doQuery("UPDATE glpi_plugin_procedimientos_procedimientos_forms AS a
-									LEFT join glpi_plugin_formcreator_targettickets b
-									on  a.plugin_formcreator_forms_id = b.plugin_formcreator_forms_id
-									SET
-									a.plugin_formcreator_targettickets_id = IF(b.id IS NOT NULL, b.id, 0)");
-
-			$plugin = new Plugin();
-
-			if($plugin->isInstalled('formcreator') || $plugin->isActivated('formcreator')) {
-
-				$DB->doQuery("UPDATE glpi_plugin_formcreator_targettickets AS a
-											LEFT join glpi_plugin_procedimientos_procedimientos_forms b
-											on  a.id = b.plugin_formcreator_targettickets_id and b.plugin_formcreator_targettickets_id IS NOT NULL
-											SET
-											a.plugin_procedimientos_procedimientos_id = IF(b.plugin_procedimientos_procedimientos_id IS NOT NULL, b.plugin_procedimientos_procedimientos_id, 0)");
+			$DB->request("UPDATE glpi_plugin_procedimientos_procedimientos_forms AS a LEFT join glpi_plugin_formcreator_targettickets b on  a.plugin_formcreator_forms_id = b.plugin_formcreator_forms_id SET a.plugin_formcreator_targettickets_id = IF(b.id IS NOT NULL, b.id, 0)");
+			if (Plugin::isPluginInstalled('formcreator') || Plugin::isPluginActivated('formcreator')) {
+				$DB->request("UPDATE glpi_plugin_formcreator_targettickets AS a LEFT join glpi_plugin_procedimientos_procedimientos_forms b on  a.id = b.plugin_formcreator_targettickets_id and b.plugin_formcreator_targettickets_id IS NOT NULL SET a.plugin_procedimientos_procedimientos_id = IF(b.plugin_procedimientos_procedimientos_id IS NOT NULL, b.plugin_procedimientos_procedimientos_id, 0)");
 			}
 		}
-
 	}
   // *******************************************************************************************
   //  [FINAL] [CRI] JMZ18G ASOCIAR AL PLUGIN EL DESTINO DEL TICKET DE FORMCREATOR 
@@ -546,23 +556,22 @@ function plugin_procedimientos_update_Validation($item) {
 		if (isset($procedimientos_id)){ // Si existe un procedimiento ejecutándose para ese ticket.			
 			$select = "SELECT id from `glpi_plugin_procedimientos_procedimientos_tickets`
 					   WHERE tickets_id=".$tickets_id." and itemtype='PluginProcedimientosAccion' and instancia_id=".$id." and state=2;";					   
-			$result_select = $DB->doQuery($select);
-			$__msg = "Select: " . $select . "\n";
-			if (class_exists('Toolbox') && method_exists('Toolbox', 'logInFile')) {
-				Toolbox::logInFile('procedimientos', $__msg);
-			} else {
-				error_log('[procedimientos] ' . $__msg);
-			}
-					// [INICIO] [CRI] [JMZ18G] fetch_array deprecated function	
-          //$row = $DB->fetch_array($result_select);
-						$row = $DB->fetchAssoc($result_select);
-					// [FINAL] [CRI] [JMZ18G] fetch_array deprecated function						
-			if (isset($row['id'])){
-				$update = "UPDATE `glpi_plugin_procedimientos_procedimientos_tickets` SET `state`=1 
-					   WHERE id=".$row['id'].";";
-				$result_update = $DB->doQuery($update);
-				ejecutar_Procedimiento($tickets_id);			
-			}
+			   $result_select = $DB->request($select);
+			   $__msg = "Select: " . $select . "\n";
+			   if (class_exists('Toolbox') && method_exists('Toolbox', 'logInFile')) {
+				   Toolbox::logInFile('procedimientos', $__msg);
+			   } else {
+				   error_log('[procedimientos] ' . $__msg);
+			   }
+			   if ($result_select && count($result_select)) {
+				   $row = $result_select[0];
+				   if (isset($row['id'])){
+					   $update = "UPDATE `glpi_plugin_procedimientos_procedimientos_tickets` SET `state`=1 
+							  WHERE id=".$row['id'].";";
+					   $DB->request($update);
+					   ejecutar_Procedimiento($tickets_id);            
+				   }
+			   }
 		}
 	}
 	return true;	
@@ -714,23 +723,21 @@ function plugin_procedimientos_update_TicketTask($item) {
 	$state = $item->getField('state');
 	$tickets_id = $item->getField('tickets_id');
 	Toolbox::logInFile("procedimientos", "Tarea de Ticket con ID ".$id." modifica su estado (".$state.") en el ticket con ID ".$tickets_id. "\n"); 
-	if ($state == 2){ // Estado "Hecho"		
+	if ($state == 2){ // Estado "Hecho"      
 		$procedimientos_id = get_procedimiento_principal($tickets_id); 
-		if (isset($procedimientos_id)){ // Si existe un procedimiento ejecutándose para ese ticket.			
+		if (isset($procedimientos_id)){ // Si existe un procedimiento ejecutándose para ese ticket.         
 			$select = "SELECT id from `glpi_plugin_procedimientos_procedimientos_tickets`
-					   WHERE tickets_id=".$tickets_id." and itemtype='PluginProcedimientosAccion' and instancia_id=".$id." and state=2;";					   
-			$result_select = $DB->doQuery($select);
-            Toolbox::logInFile("procedimientos", "Select: ".$select. "\n");			            
-					// [INICIO] [CRI] [JMZ18G] fetch_array deprecated function	
-						//$row = $DB->fetch_array($result_select);
-						$row = $DB->fetchAssoc($result_select);
-					// [FINAL] [CRI] [JMZ18G] fetch_array deprecated function								
-
-			if (isset($row['id'])){
-				$update = "UPDATE `glpi_plugin_procedimientos_procedimientos_tickets` SET `state`=1 
-					   WHERE id=".$row['id'].";";
-				$result_update = $DB->doQuery($update);
-				ejecutar_Procedimiento($tickets_id);			
+						  WHERE tickets_id=".$tickets_id." and itemtype='PluginProcedimientosAccion' and instancia_id=".$id." and state=2;";                     
+			$result_select = $DB->request($select);
+			Toolbox::logInFile("procedimientos", "Select: ".$select. "\n");                        
+			if ($result_select && count($result_select)) {
+				$row = $result_select[0];
+				if (isset($row['id'])){
+					$update = "UPDATE `glpi_plugin_procedimientos_procedimientos_tickets` SET `state`=1 
+							 WHERE id=".$row['id'].";";
+					$DB->request($update);
+					ejecutar_Procedimiento($tickets_id);         
+				}
 			}
 		}
 	}
@@ -951,21 +958,18 @@ function plugin_procedimientos_add_Ticket($item) {
 							  JOIN glpi_tickettemplatepredefinedfields on (glpi_ticketrecurrents.tickettemplates_id = glpi_tickettemplatepredefinedfields.tickettemplates_id)
 							  WHERE glpi_tickettemplatepredefinedfields.num=1 and entities_id=".$entity." and is_active=1";
 
-			$result_tt = $DB->doQuery($query_tt_names);
-			$num_row_tt = $DB->numrows($result_tt);			
-			if ($num_row_tt > 0){
+			$result_tt = $DB->request($query_tt_names);
+			if ($result_tt && count($result_tt) > 0){
 				$encontrado = FALSE;
 				$name_ticket = $item->getField('name');
-			// [INICIO] [CRI] [JMZ18G] fetch_array deprecated function	
-			//while (($row_tt = $DB->fetch_array($result_tt))&& ($encontrado == FALSE)) {
-				while (($row_tt = $DB->fetchAssoc($result_tt))&& ($encontrado == FALSE)) {
-			// [FINAL] [CRI] [JMZ18G] fetch_array deprecated function	
+				foreach ($result_tt as $row_tt) {
+					if ($encontrado) break;
 					//Tratamos el campo value para modificar los parametros dd, mm, aaaa con los datos del ticket
 					$date_ticket = $item->getField('date');
 					$date = strtotime($date_ticket);
-					$dia = "[".date("Y", $date)."]";
+					$dia = "[".date("d", $date)."]";
 					$mes = "[".date("m", $date)."]";
-					$year = "[".date("d", $date)."]";
+					$year = "[".date("y", $date)."]";
 					$caso_especial = date("d", $date)."/".date("m", $date);
 					
 					$nombre_plantilla = str_replace("dd/mm-dd/mm]", $caso_especial, $row_tt['value']);					
@@ -986,20 +990,17 @@ function plugin_procedimientos_add_Ticket($item) {
 							where ticketrecurrents_id=".$row_tt["ticketrecurrents_id"]." and glpi_plugin_procedimientos_procedimientos.is_deleted=0 and 
 							glpi_plugin_procedimientos_procedimientos.active=1;";
 							
-							$result2 = $DB->doQuery($query2);
-						// [INICIO] [CRI] [JMZ18G] fetch_array deprecated function	
-						//$row2 = $DB->fetch_array($result2);
-							$row2 = $DB->fetchAssoc($result2);
-						// [FINAL] [CRI] [JMZ18G] fetch_array deprecated function	
-							if (isset($row2["plugin_procedimientos_procedimientos_id"])){
-								$procedimientos_id = $row2["plugin_procedimientos_procedimientos_id"];
-								// Borramos de los elementos de posibles anteriores procedimientos asociados al ticket correspondiente
-								$query = "delete from glpi_plugin_procedimientos_procedimientos_tickets where tickets_id=".$tickets_id;
-								$DB->doQuery($query);
-								// Instanciamos y ejecutamos procedimiento correspondiente.
-								instancia_procedimiento($procedimientos_id, $tickets_id);
-								ejecutar_Procedimiento($tickets_id);
-							}
+							   $result2 = $DB->request($query2);
+							   $row2 = ($result2 && count($result2)) ? $result2[0] : null;
+							   if (isset($row2["plugin_procedimientos_procedimientos_id"])){
+								   $procedimientos_id = $row2["plugin_procedimientos_procedimientos_id"];
+								   // Borramos de los elementos de posibles anteriores procedimientos asociados al ticket correspondiente
+								   $query = "delete from glpi_plugin_procedimientos_procedimientos_tickets where tickets_id=".$tickets_id;
+								   $DB->request($query);
+								   // Instanciamos y ejecutamos procedimiento correspondiente.
+								   instancia_procedimiento($procedimientos_id, $tickets_id);
+								   ejecutar_Procedimiento($tickets_id);
+							   }
 						}						
 					}				
 				}
@@ -1045,37 +1046,27 @@ if ((isset($_POST["actualizarPedido"]))
 									FROM glpi_plugin_procedimientos_procedimientos_tickets
 									where tickets_id=".$tickets_id."
 									order by id;";
-					$result_proc = $DB->doQuery($select_proc);
-					$num_rows = $DB->numrows($result_proc);
-	
-					if ($num_rows > 0){	
-					// [INICIO] [CRI] [JMZ18G] fetch_array deprecated function		
-					//$proc_actual = $DB->fetch_array($result_proc);
-						$proc_actual = $DB->fetchAssoc($result_proc);
-					// [FINAL] [CRI] [JMZ18G] fetch_array deprecated function	
-						$proc_actual_ID = $proc_actual['plugin_procedimientos_procedimientos_id'];
-						
-						if ($procedimientos_id != $proc_actual_ID){
-							// Borramos de los elementos de posibles anteriores procedimientos asociados al ticket correspondiente
-							$query = "delete from glpi_plugin_procedimientos_procedimientos_tickets where tickets_id=".$tickets_id;
-							$DB->doQuery($query);
-							// Instanciamos y ejecutamos procedimiento correspondiente.
-							// echo "<br>En updateTicket<br>";
-							//echo "<br>procedimientos_id <> proc_actual_ID<br>";
-							instancia_procedimiento($procedimientos_id, $tickets_id);
-							ejecutar_Procedimiento($tickets_id);
-							//unset($_POST["actualizarPedido"]);
-							//unset($_POST["peticion_id"]);
-							$pedido = true;
-						}
-					} else {
-						instancia_procedimiento($procedimientos_id, $tickets_id);
-						ejecutar_Procedimiento($tickets_id);
-					}
+					   $result_proc = $DB->request($select_proc);
+					   if ($result_proc && count($result_proc) > 0){
+						   $proc_actual = $result_proc[0];
+						   $proc_actual_ID = $proc_actual['plugin_procedimientos_procedimientos_id'];
+						   if ($procedimientos_id != $proc_actual_ID){
+							   // Borramos de los elementos de posibles anteriores procedimientos asociados al ticket correspondiente
+							   $query = "delete from glpi_plugin_procedimientos_procedimientos_tickets where tickets_id=".$tickets_id;
+							   $DB->request($query);
+							   // Instanciamos y ejecutamos procedimiento correspondiente.
+							   instancia_procedimiento($procedimientos_id, $tickets_id);
+							   ejecutar_Procedimiento($tickets_id);
+							   $pedido = true;
+						   }
+					   } else {
+						   instancia_procedimiento($procedimientos_id, $tickets_id);
+						   ejecutar_Procedimiento($tickets_id);
+					   }
 				} else { // emb97m - INFORGES - No hay procedimiento para el pedido de catálogo.
 					// Borramos de los elementos de posibles anteriores procedimientos asociados al ticket correspondiente
 					$query_proc = "delete from glpi_plugin_procedimientos_procedimientos_tickets where tickets_id=".$tickets_id;
-					$DB->doQuery($query_proc);						
+					   $DB->request($query_proc);                      
 				}
 		}
 		return true;
@@ -1383,9 +1374,13 @@ function plugin_procedimientos_MassiveActions($type) {
 	
 	}
 	
-		 // *******************************************************************************************
-		 //  [INICIO] [CRI] JMZ18G ASOCIAR AL PLUGIN EL DESTINO DEL TICKET DE FORMCREATOR 
-		 // ******************************************************************************************* 
-	
-
-?>
+   // Automatic migration: ensure plugin_procedimientos_tipoaccions_id is unsigned (must run after install.sql)
+   try {
+      $DB->request("ALTER TABLE glpi_plugin_procedimientos_accions MODIFY COLUMN plugin_procedimientos_tipoaccions_id tinyint(1) unsigned NOT NULL DEFAULT '0';");
+   } catch (Exception $e) {
+      if (class_exists('Toolbox') && method_exists('Toolbox', 'logInFile')) {
+         Toolbox::logInFile('procedimientos', 'Migration warning: ' . $e->getMessage());
+      } else {
+         error_log('[procedimientos] Migration warning: ' . $e->getMessage());
+      }
+   }
